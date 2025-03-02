@@ -4,7 +4,6 @@ import { EditorState } from "@codemirror/state";
 import { xml } from "@codemirror/lang-xml";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { basicSetup } from "codemirror";
-import { Code as CodeIcon } from "lucide-react";
 
 interface CodeEditorProps {
   value: string;
@@ -23,12 +22,34 @@ export function CodeEditor({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // 設置編輯器主題和基本樣式
+    const theme = EditorView.theme({
+      "&": {
+        height: "100%",
+        fontSize: "14px"
+      },
+      ".cm-content": {
+        fontFamily: "monospace",
+        backgroundColor: "var(--background)",
+        color: "var(--foreground)"
+      },
+      ".cm-gutters": {
+        backgroundColor: "var(--background)",
+        color: "var(--muted-foreground)",
+        border: "none"
+      },
+      "&.cm-focused": {
+        outline: "none"
+      }
+    });
+
     const state = EditorState.create({
       doc: value,
       extensions: [
         basicSetup,
         xml(),
         oneDark,
+        theme,
         lineNumbers(),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
@@ -84,8 +105,9 @@ export function CodeEditor({
   }, [selectedComponent]);
 
   return (
-    <div ref={containerRef} className="h-full w-full overflow-hidden" />
+    <div 
+      ref={containerRef} 
+      className="h-full w-full overflow-hidden bg-background text-foreground"
+    />
   );
 }
-
-export { CodeIcon };

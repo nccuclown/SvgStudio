@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronDown, Search } from "lucide-react";
@@ -162,6 +162,18 @@ export function ComponentTree({
     // 節點縮進
     const indent = level * 12;
 
+    // 處理展開/收起按鈕點擊
+    const handleExpandClick = (e: React.MouseEvent) => {
+      e.stopPropagation(); // 阻止事件冒泡
+      setIsExpanded(!isExpanded);
+    };
+
+    // 處理節點選擇
+    const handleNodeClick = (e: React.MouseEvent) => {
+      e.stopPropagation(); // 阻止事件冒泡
+      onSelectComponent(node.id);
+    };
+
     return (
       <div>
         <div 
@@ -177,7 +189,7 @@ export function ComponentTree({
               variant="ghost"
               size="icon"
               className="h-6 w-6 p-0"
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={handleExpandClick}
             >
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
@@ -193,7 +205,7 @@ export function ComponentTree({
             className="flex-1 flex items-center cursor-pointer text-sm pl-1 py-0.5"
             onMouseEnter={() => onHoverComponent(node.id)}
             onMouseLeave={() => onHoverComponent(null)}
-            onClick={() => onSelectComponent(node.id)}
+            onClick={handleNodeClick}
           >
             <span className={cn(
               "font-medium mr-1",
