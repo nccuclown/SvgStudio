@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { EditorView, lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { xml } from "@codemirror/lang-xml";
-import { oneDark } from "@codemirror/theme-one-dark";
 import { basicSetup } from "codemirror";
 
 interface CodeEditorProps {
@@ -22,25 +21,43 @@ export function CodeEditor({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // 設置編輯器主題和基本樣式
+    // 自定義主題
     const theme = EditorView.theme({
       "&": {
         height: "100%",
-        fontSize: "14px"
+        fontSize: "14px",
       },
       ".cm-content": {
         fontFamily: "monospace",
-        backgroundColor: "var(--background)",
-        color: "var(--foreground)"
+        backgroundColor: "hsl(var(--background))",
+        color: "hsl(var(--foreground))",
+        caretColor: "hsl(var(--primary))"
       },
       ".cm-gutters": {
-        backgroundColor: "var(--background)",
-        color: "var(--muted-foreground)",
-        border: "none"
+        backgroundColor: "hsl(var(--muted))",
+        color: "hsl(var(--muted-foreground))",
+        border: "none",
+        borderRight: "1px solid hsl(var(--border))"
+      },
+      ".cm-line": {
+        padding: "0 4px"
+      },
+      ".cm-selectionBackground": {
+        backgroundColor: "hsl(var(--accent)/.5) !important"
+      },
+      ".cm-cursor": {
+        borderLeftColor: "hsl(var(--primary))"
       },
       "&.cm-focused": {
         outline: "none"
-      }
+      },
+      // 語法高亮
+      ".cm-keyword": { color: "hsl(var(--primary))" },
+      ".cm-tag": { color: "hsl(var(--secondary))" },
+      ".cm-attribute": { color: "hsl(var(--accent))" },
+      ".cm-string": { color: "hsl(var(--success))" },
+      ".cm-number": { color: "hsl(var(--warning))" },
+      ".cm-comment": { color: "hsl(var(--muted-foreground))" }
     });
 
     const state = EditorState.create({
@@ -48,7 +65,6 @@ export function CodeEditor({
       extensions: [
         basicSetup,
         xml(),
-        oneDark,
         theme,
         lineNumbers(),
         EditorView.updateListener.of((update) => {
@@ -107,7 +123,7 @@ export function CodeEditor({
   return (
     <div 
       ref={containerRef} 
-      className="h-full w-full overflow-hidden bg-background text-foreground"
+      className="h-full w-full overflow-hidden border rounded-md"
     />
   );
 }
