@@ -59,6 +59,23 @@ export function CodeEditor({ value, onChange, error, selectedComponent }: CodeEd
     }
   }, [value]);
 
+  // Scroll to selected component
+  useEffect(() => {
+    if (!selectedComponent || !editorRef.current) return;
+
+    const doc = editorRef.current.state.doc.toString();
+    const componentPattern = new RegExp(`id="${selectedComponent}"[^>]*>`, "i");
+    const match = doc.match(componentPattern);
+
+    if (match) {
+      const pos = doc.indexOf(match[0]);
+      const line = editorRef.current.state.doc.lineAt(pos);
+      editorRef.current.dispatch({
+        effects: EditorView.scrollIntoView(pos, { y: 'center' })
+      });
+    }
+  }, [selectedComponent]);
+
   return (
     <div className="h-full flex flex-col">
       {error && (
