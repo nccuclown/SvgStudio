@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { parseSvgComponents, flattenSvgComponents } from "@/lib/svg-utils";
+import { parseSvgComponents, flattenSvgComponents, updateSvgComponent } from "@/lib/svg-utils";
 
 const DEFAULT_SVG = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
   <rect id="rect1" x="10" y="10" width="80" height="80" fill="blue" />
@@ -38,34 +38,8 @@ export function useSvgEditor() {
 
   const updateElementProperty = useCallback((id: string, property: string, value: string) => {
     try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(code, "image/svg+xml");
-      const element = doc.getElementById(id);
-
-      if (element) {
-        // Update the attribute
-        element.setAttribute(property, value);
-
-        // Convert back to string and update the code
-        const serializer = new XMLSerializer();
-        const updatedSvg = serializer.serializeToString(doc);
-
-        // Find the original element in the code
-        const elementRegex = new RegExp(`<[^>]*id="${id}"[^>]*>(?:.*?</${element.tagName}>)?`, 'gs');
-        const match = code.match(elementRegex);
-
-        if (match) {
-          // Find the updated version of the element
-          const updatedMatch = updatedSvg.match(elementRegex);
-          if (updatedMatch) {
-            // Replace only the specific element, preserving the rest of the code
-            const newCode = code.replace(match[0], updatedMatch[0]);
-            setCode(newCode);
-            return;
-          }
-        }
-
-        // Fallback: use the entire updated SVG if specific element replacement fails
+      const updatedSvg = updateSvgComponent(code, id, property, value);
+      if (updatedSvg !== code) {
         setCode(updatedSvg);
       }
     } catch (err) {
