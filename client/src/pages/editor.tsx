@@ -17,6 +17,7 @@ export default function Editor() {
     toggleGrid,
     validationError,
     updateElementProperty,
+    fullComponents,
   } = useSvgEditor();
 
   return (
@@ -40,6 +41,7 @@ export default function Editor() {
                 selectedComponent={selectedComponent}
                 svg={code}
                 onPropertyChange={updateElementProperty}
+                fullComponents={fullComponents}
               />
             </ResizablePanel>
           </ResizablePanelGroup>

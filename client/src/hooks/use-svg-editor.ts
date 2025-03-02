@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { parseSvgComponents } from "@/lib/svg-utils";
+import { parseSvgComponents, flattenSvgComponents } from "@/lib/svg-utils";
 
 const DEFAULT_SVG = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
   <rect id="rect1" x="10" y="10" width="80" height="80" fill="blue" />
@@ -14,6 +14,7 @@ export function useSvgEditor() {
   const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
   const [showGrid, setShowGrid] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [fullComponents, setFullComponents] = useState<ReturnType<typeof parseSvgComponents>>([]);
 
   useEffect(() => {
     try {
@@ -27,7 +28,9 @@ export function useSvgEditor() {
       }
 
       setValidationError(null);
-      setComponents(parseSvgComponents(code));
+      const parsed = parseSvgComponents(code);
+      setFullComponents(parsed);
+      setComponents(flattenSvgComponents(parsed));
     } catch (err) {
       setValidationError((err as Error).message);
     }
@@ -64,5 +67,6 @@ export function useSvgEditor() {
     toggleGrid,
     validationError,
     updateElementProperty,
+    fullComponents, // Add this to expose full component data
   };
 }
