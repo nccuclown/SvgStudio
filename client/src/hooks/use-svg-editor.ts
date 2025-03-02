@@ -9,7 +9,7 @@ const DEFAULT_SVG = `<svg width="200" height="200" xmlns="http://www.w3.org/2000
 
 export function useSvgEditor() {
   const [code, setCode] = useState(DEFAULT_SVG);
-  const [components, setComponents] = useState<Array<{ id: string; type: string }>>([]);
+  const [components, setComponents] = useState<Array<{ id: string; type: string; parentId?: string }>>([]);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
   const [showGrid, setShowGrid] = useState(true);
@@ -67,6 +67,6 @@ export function useSvgEditor() {
     toggleGrid,
     validationError,
     updateElementProperty,
-    fullComponents, // Add this to expose full component data
+    fullComponents,
   };
 }

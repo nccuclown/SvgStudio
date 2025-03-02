@@ -66,9 +66,10 @@ export function parseSvgComponents(svgString: string): Array<SVGComponent> {
   return components;
 }
 
-export function flattenSvgComponents(components: SVGComponent[]): Array<{ id: string; type: string }> {
+export function flattenSvgComponents(components: SVGComponent[]): Array<{ id: string; type: string; parentId?: string }> {
   return components.map(component => ({
     id: component.id,
-    type: component.type
+    type: component.type,
+    parentId: component.parentId
   }));
 }

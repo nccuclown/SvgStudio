@@ -19,11 +19,11 @@ export function Preview({
   const modifiedSvg = svg
     .replace(
       new RegExp(`id="${selectedComponent}"(?!.*style=)`, "g"),
-      `id="${selectedComponent}" style="outline: 2px solid hsl(var(--primary)); outline-offset: 2px;"`
+      `id="${selectedComponent}" style="outline: 4px solid hsl(var(--primary)); outline-offset: 4px; filter: drop-shadow(0 0 4px hsl(var(--primary)))"`
     )
     .replace(
       `id="${selectedComponent}" style="`,
-      `id="${selectedComponent}" style="outline: 2px solid hsl(var(--primary)); outline-offset: 2px; `
+      `id="${selectedComponent}" style="outline: 4px solid hsl(var(--primary)); outline-offset: 4px; filter: drop-shadow(0 0 4px hsl(var(--primary))); `
     )
     .replace(
       new RegExp(`id="${hoveredComponent}"(?!.*style=)`, "g"),
