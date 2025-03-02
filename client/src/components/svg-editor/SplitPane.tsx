@@ -81,7 +81,7 @@ export function SplitPane({
         </Button>
       </div>
       <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={35} minSize={25}>
+        <ResizablePanel defaultSize={30} minSize={20}>
           <CodeEditor
             value={code}
             onChange={onCodeChange}
@@ -90,7 +90,7 @@ export function SplitPane({
           />
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={65} minSize={45}>
+        <ResizablePanel defaultSize={70} minSize={50}>
           <Preview
             svg={code}
             showGrid={showGrid}
