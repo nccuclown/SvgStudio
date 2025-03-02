@@ -57,19 +57,6 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
       attributes['_text'] = textContent;
     }
 
-    // 處理動畫相關屬性
-    if (element.tagName.toLowerCase().startsWith('animate')) {
-      const dur = element.getAttribute('dur');
-      const values = element.getAttribute('values');
-      const repeatCount = element.getAttribute('repeatCount');
-      const attributeName = element.getAttribute('attributeName');
-
-      if (dur) attributes['dur'] = dur;
-      if (values) attributes['values'] = values;
-      if (repeatCount) attributes['repeatCount'] = repeatCount;
-      if (attributeName) attributes['attributeName'] = attributeName;
-    }
-
     return attributes;
   }
 

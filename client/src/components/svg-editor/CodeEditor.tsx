@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
-import { EditorView, lineNumbers } from "@codemirror/view";
+import { EditorView, lineNumbers, keymap } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { xml } from "@codemirror/lang-xml";
 import { basicSetup } from "codemirror";
+import { indentWithTab, defaultKeymap } from "@codemirror/commands";
 
 interface CodeEditorProps {
   value: string;
@@ -31,6 +32,8 @@ export function CodeEditor({
         fontFamily: "monospace",
         backgroundColor: "#1e1e1e",
         color: "#d4d4d4",
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-word"
       },
       ".cm-gutters": {
         backgroundColor: "#1e1e1e",
@@ -67,6 +70,8 @@ export function CodeEditor({
         xml(),
         theme,
         lineNumbers(),
+        keymap.of([...defaultKeymap, indentWithTab]),
+        EditorView.lineWrapping,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString());

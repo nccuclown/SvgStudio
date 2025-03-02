@@ -68,7 +68,9 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
   const updateComponentProperty = useCallback((id: string, property: string, value: string) => {
     try {
       const updatedSvg = updateSvgComponent(svgCode, id, property, value);
-      setSvgCode(updatedSvg);
+      if (updatedSvg !== svgCode) {
+        setSvgCode(updatedSvg);
+      }
     } catch (error) {
       console.error("更新組件屬性時出錯:", error);
     }
@@ -92,7 +94,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
   // 獲取選中的組件詳情
   const getSelectedComponent = useCallback(() => {
     if (!selectedComponentId || !fullComponents.length) return null;
-
     return findComponentById(fullComponents, selectedComponentId);
   }, [selectedComponentId, fullComponents]);
 
