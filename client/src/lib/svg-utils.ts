@@ -17,6 +17,17 @@ export interface FlatComponent {
   attributes: Record<string, string>;
 }
 
+let counter = 0;
+
+function generateUniqueId(type: string, parentId?: string): string {
+  // 如果有父ID，使用父ID作為前綴（例如：stage3-circle-1）
+  if (parentId) {
+    return `${parentId}-${type}-${counter++}`;
+  }
+  // 否則只使用類型和計數器（例如：circle-1）
+  return `${type}-${counter++}`;
+}
+
 /**
  * 解析SVG字符串為組件樹
  */
@@ -62,9 +73,17 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
   function processElement(element: Element, parentComponent?: SVGComponent): SVGComponent {
     const type = element.tagName.toLowerCase();
 
-    // 創建組件對象，使用原始ID
+    // 獲取或生成元素ID
+    let id = element.getAttribute('id') || '';
+    if (!id) {
+      // 使用父元素的ID作為前綴生成新ID
+      id = generateUniqueId(type, parentComponent?.id);
+      element.setAttribute('id', id);
+    }
+
+    // 創建組件對象
     const component: SVGComponent = {
-      id: element.getAttribute('id') || '', // 保持原始ID
+      id: id,
       type,
       parentId: parentComponent?.id,
       attributes: getElementAttributes(element),
@@ -143,15 +162,25 @@ export function updateSvgComponent(
   });
 
   try {
+    console.log(`[updateSvgComponent] 解析 SVG 字符串...`);
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgString, "image/svg+xml");
 
+    // 檢查解析錯誤
+    const parseError = doc.querySelector("parsererror");
+    if (parseError) {
+      console.error(`[updateSvgComponent] SVG 解析錯誤:`, parseError.textContent);
+      return svgString;
+    }
+
     // 遞歸查找元素
     function findElementById(element: Element, id: string): Element | null {
+      // 檢查當前元素ID
       if (element.getAttribute('id') === id) {
         return element;
       }
 
+      // 遍歷子元素
       for (const child of Array.from(element.children)) {
         const found = findElementById(child, id);
         if (found) return found;
@@ -160,7 +189,7 @@ export function updateSvgComponent(
       return null;
     }
 
-    // 從根元素開始查找
+    console.log(`[updateSvgComponent] 查找目標元素: ${componentId}`);
     const svgRoot = doc.documentElement;
     const element = findElementById(svgRoot, componentId);
 
@@ -169,50 +198,70 @@ export function updateSvgComponent(
       return svgString;
     }
 
-    console.log(`[updateSvgComponent] 找到元素:`, {
-      type: element.tagName,
-      currentId: element.getAttribute('id'),
-      parentId: element.parentElement?.getAttribute('id')
-    });
-
     // 更新屬性
-    if (propertyName === '_text') {
-      element.textContent = propertyValue;
-    } else if (propertyName.startsWith('style-')) {
-      const styleName = propertyName.replace('style-', '');
-      const currentStyle = element.getAttribute('style') || '';
-
-      // 解析當前樣式
-      const styles = new Map();
-      currentStyle.split(';').forEach(pair => {
-        const [name, value] = pair.split(':').map(s => s.trim());
-        if (name && value) {
-          styles.set(name, value);
-        }
-      });
-
-      // 更新或添加新樣式
-      styles.set(styleName, propertyValue);
-
-      // 重建樣式字符串
-      const newStyle = Array.from(styles.entries())
-        .map(([name, value]) => `${name}: ${value}`)
-        .join('; ');
-
-      element.setAttribute('style', newStyle);
-    } else {
-      if (propertyValue === '') {
-        element.removeAttribute(propertyName);
-      } else {
-        element.setAttribute(propertyName, propertyValue);
+    try {
+      // 特殊屬性處理
+      if (propertyName === '_text') {
+        console.log(`[updateSvgComponent] 更新文本內容`);
+        element.textContent = propertyValue;
       }
+      // 樣式屬性處理
+      else if (propertyName.startsWith('style-')) {
+        console.log(`[updateSvgComponent] 更新樣式屬性`);
+        const styleName = propertyName.replace('style-', '');
+        const currentStyle = element.getAttribute('style') || '';
+
+        // 解析當前樣式
+        const styles = new Map();
+        currentStyle.split(';').forEach(pair => {
+          const [name, value] = pair.split(':').map(s => s.trim());
+          if (name && value) {
+            styles.set(name, value);
+          }
+        });
+
+        // 更新或添加新樣式
+        styles.set(styleName, propertyValue);
+
+        // 重建樣式字符串
+        const newStyle = Array.from(styles.entries())
+          .map(([name, value]) => `${name}: ${value}`)
+          .join('; ');
+
+        console.log(`[updateSvgComponent] 新的樣式字符串:`, newStyle);
+        element.setAttribute('style', newStyle);
+      }
+      // 一般屬性處理
+      else {
+        console.log(`[updateSvgComponent] 更新一般屬性`);
+        if (propertyValue === '') {
+          element.removeAttribute(propertyName);
+        } else {
+          element.setAttribute(propertyName, propertyValue);
+        }
+      }
+    } catch (attrError) {
+      console.error(`[updateSvgComponent] 更新屬性時出錯:`, attrError);
+      return svgString;
     }
 
-    // 序列化並返回
+    // 序列化並返回更新後的SVG
+    console.log(`[updateSvgComponent] 序列化更新後的文檔`);
     const serializer = new XMLSerializer();
-    return serializer.serializeToString(doc);
+    const updatedSvg = serializer.serializeToString(doc);
+
+    // 驗證更新是否成功
+    console.log(`[updateSvgComponent] 驗證更新後的 SVG`);
+    const validation = new DOMParser().parseFromString(updatedSvg, "image/svg+xml");
+    if (validation.querySelector("parsererror")) {
+      console.error(`[updateSvgComponent] 更新後的 SVG 無效`);
+      return svgString;
+    }
+
+    console.log(`[updateSvgComponent] 更新成功`);
+    return updatedSvg;
   } catch (error) {
-    console.error("更新SVG元素屬性時出錯:", error);
+    console.error(`[updateSvgComponent] 處理過程中出錯:`, error);
     return svgString;
   }
 }
