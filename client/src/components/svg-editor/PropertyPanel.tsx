@@ -64,6 +64,13 @@ export function PropertyPanel({
   // 渲染特定類型的屬性編輯器
   const renderPropertyEditor = (property: string, value: string) => {
     const handleChange = (newValue: string) => {
+      console.log(`[PropertyPanel] 屬性變更:`, {
+        componentId: component.id,
+        property,
+        oldValue: value,
+        newValue
+      });
+
       // 如果是樣式屬性，需要添加 style- 前綴
       const actualProperty = property.startsWith('style-') ? property : property;
       onPropertyChange(component.id, actualProperty, newValue);

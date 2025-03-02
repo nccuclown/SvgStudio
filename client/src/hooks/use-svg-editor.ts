@@ -66,13 +66,24 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
 
   // 更新組件屬性
   const updateComponentProperty = useCallback((id: string, property: string, value: string) => {
+    console.log(`[updateComponentProperty] 開始更新組件屬性:`, {
+      id,
+      property,
+      value
+    });
+
     try {
+      console.log(`[updateComponentProperty] 當前 SVG 代碼長度:`, svgCode.length);
       const updatedSvg = updateSvgComponent(svgCode, id, property, value);
+
       if (updatedSvg !== svgCode) {
+        console.log(`[updateComponentProperty] SVG 已更新，新代碼長度:`, updatedSvg.length);
         setSvgCode(updatedSvg);
+      } else {
+        console.warn(`[updateComponentProperty] SVG 未發生變化`);
       }
     } catch (error) {
-      console.error("更新組件屬性時出錯:", error);
+      console.error(`[updateComponentProperty] 更新過程中出錯:`, error);
     }
   }, [svgCode]);
 
