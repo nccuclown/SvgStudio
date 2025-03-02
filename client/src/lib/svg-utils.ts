@@ -1,6 +1,9 @@
-import { XMLParser } from 'fast-xml-parser';
+/**
+ * SVG編輯器工具函數
+ * 提供SVG解析、操作和序列化功能
+ */
 
-interface SVGComponent {
+export interface SVGComponent {
   id: string;
   type: string;
   parentId?: string;
@@ -8,117 +11,209 @@ interface SVGComponent {
   children: SVGComponent[];
 }
 
-export function parseSvgComponents(svgString: string): Array<SVGComponent> {
+export interface FlatComponent {
+  id: string;
+  type: string;
+  parentId?: string;
+}
+
+/**
+ * 解析SVG字符串為組件樹
+ */
+export function parseSvgComponents(svgString: string): SVGComponent[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, "image/svg+xml");
-  const components: Array<SVGComponent> = [];
+  const components: SVGComponent[] = [];
   let counter = 0;
+
+  // 檢查解析錯誤
+  const errorNode = doc.querySelector("parsererror");
+  if (errorNode) {
+    throw new Error("SVG解析錯誤: " + errorNode.textContent);
+  }
 
   function getElementAttributes(element: Element): Record<string, string> {
     const attributes: Record<string, string> = {};
+
+    // 獲取所有屬性
     Array.from(element.attributes).forEach(attr => {
-      // Include all attributes including style
-      attributes[attr.name] = attr.value;
+      if (attr.name !== 'id') {
+        attributes[attr.name] = attr.value;
+      }
     });
 
-    // Parse style attribute if exists
+    // 解析樣式屬性
     const style = element.getAttribute('style');
     if (style) {
-      const styleObj = style.split(';').reduce((acc: Record<string, string>, curr: string) => {
-        const [key, value] = curr.split(':').map(s => s.trim());
-        if (key && value) {
-          acc[key] = value;
+      style.split(';').forEach(prop => {
+        const [name, value] = prop.trim().split(':').map(s => s.trim());
+        if (name && value) {
+          attributes[`style-${name}`] = value;
         }
-        return acc;
-      }, {});
-      Object.assign(attributes, styleObj);
+      });
+    }
+
+    // 處理文本內容
+    const textContent = element.textContent?.trim();
+    if (textContent && element.children.length === 0) {
+      attributes['_text'] = textContent;
+    }
+
+    // 處理動畫相關屬性
+    if (element.tagName.toLowerCase().startsWith('animate')) {
+      const dur = element.getAttribute('dur');
+      const values = element.getAttribute('values');
+      const repeatCount = element.getAttribute('repeatCount');
+      const attributeName = element.getAttribute('attributeName');
+
+      if (dur) attributes['dur'] = dur;
+      if (values) attributes['values'] = values;
+      if (repeatCount) attributes['repeatCount'] = repeatCount;
+      if (attributeName) attributes['attributeName'] = attributeName;
     }
 
     return attributes;
   }
 
-  function processElement(element: Element, parentId?: string) {
+  function processElement(element: Element, parentId?: string): SVGComponent {
     const type = element.tagName.toLowerCase();
-    // Skip comments and processing instructions
-    if (type === '#comment' || type === '#processing-instruction') return;
 
-    let id = element.id;
-    // If element doesn't have an id, generate one based on type and parent
+    // 跳過註釋和處理指令
+    if (type === '#comment' || type === '#processing-instruction') {
+      return null;
+    }
+
+    // 獲取或生成元素ID
+    let id = element.getAttribute('id') || '';
     if (!id) {
       id = parentId ? 
         `${parentId}-${type}-${counter++}` : 
         `${type}-${counter++}`;
-      element.id = id;
+      element.setAttribute('id', id);
     }
 
-    // Get all attributes of the element
-    const attributes = getElementAttributes(element);
-
-    // Create component object
+    // 創建組件對象
     const component: SVGComponent = {
       id,
       type,
       parentId,
-      attributes,
+      attributes: getElementAttributes(element),
       children: []
     };
 
-    components.push(component);
-
-    // Process all child elements including animate and other special elements
-    Array.from(element.children).forEach(child => {
-      // Include animation elements
-      if (child.tagName.toLowerCase().startsWith('animate')) {
-        const animationComponent = processElement(child, id);
-        if (animationComponent) {
-          component.children.push(animationComponent);
+    // 處理子元素，包括動畫元素
+    Array.from(element.childNodes).forEach(node => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const childElement = node as Element;
+        const childComponent = processElement(childElement, id);
+        if (childComponent) {
+          component.children.push(childComponent);
         }
-      } else {
-        processElement(child, id);
+      } else if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent?.trim();
+        if (text) {
+          component.attributes['_text'] = text;
+        }
       }
     });
 
     return component;
   }
 
-  const svgElement = doc.querySelector("svg");
+  // 從根元素開始處理
+  const svgElement = doc.querySelector('svg');
   if (svgElement) {
-    processElement(svgElement);
+    const rootComponent = processElement(svgElement);
+    if (rootComponent) {
+      components.push(rootComponent);
+    }
   }
 
   return components;
 }
 
-export function flattenSvgComponents(components: SVGComponent[]): Array<{ id: string; type: string; parentId?: string }> {
-  return components.map(component => ({
-    id: component.id,
-    type: component.type,
-    parentId: component.parentId
-  }));
+/**
+ * 將組件樹扁平化為列表
+ */
+export function flattenSvgComponents(components: SVGComponent[]): FlatComponent[] {
+  const result: FlatComponent[] = [];
+
+  function flatten(component: SVGComponent) {
+    result.push({
+      id: component.id,
+      type: component.type,
+      parentId: component.parentId
+    });
+
+    component.children.forEach(child => flatten(child));
+  }
+
+  components.forEach(component => flatten(component));
+  return result;
 }
 
 /**
- * Updates a specific component's attribute in the SVG string
+ * 在組件樹中查找特定ID的組件
+ */
+export function findComponentById(components: SVGComponent[], id: string): SVGComponent | null {
+  for (const component of components) {
+    if (component.id === id) {
+      return component;
+    }
+
+    const found = component.children.find(child => findComponentById([child], id));
+    if (found) return found;
+  }
+
+  return null;
+}
+
+/**
+ * 更新SVG元素的屬性
  */
 export function updateSvgComponent(
   svgString: string,
   componentId: string,
-  attributeName: string,
-  attributeValue: string
+  propertyName: string,
+  propertyValue: string
 ): string {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(svgString, "image/svg+xml");
-  const element = doc.getElementById(componentId);
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgString, "image/svg+xml");
+    const element = doc.getElementById(componentId);
 
-  if (!element) return svgString;
+    if (!element) return svgString;
 
-  // Handle style attributes differently
-  if (element.style[attributeName as any]) {
-    element.style[attributeName as any] = attributeValue;
-  } else {
-    element.setAttribute(attributeName, attributeValue);
+    // 檢查是否為樣式屬性
+    if (propertyName.startsWith('style-')) {
+      const styleName = propertyName.replace('style-', '');
+      const currentStyles = element.getAttribute('style') || '';
+      const styles = new Map(
+        currentStyles.split(';')
+          .map(s => s.trim())
+          .filter(s => s)
+          .map(s => s.split(':').map(p => p.trim()) as [string, string])
+      );
+
+      styles.set(styleName, propertyValue);
+      const newStyle = Array.from(styles.entries())
+        .map(([name, value]) => `${name}: ${value}`)
+        .join('; ');
+
+      element.setAttribute('style', newStyle);
+    } else if (propertyName === '_text') {
+      // 處理文本內容
+      element.textContent = propertyValue;
+    } else {
+      // 處理普通屬性
+      element.setAttribute(propertyName, propertyValue);
+    }
+
+    // 序列化並返回更新後的SVG
+    const serializer = new XMLSerializer();
+    return serializer.serializeToString(doc);
+  } catch (error) {
+    console.error('更新SVG元素屬性時出錯:', error);
+    return svgString;
   }
-
-  const serializer = new XMLSerializer();
-  return serializer.serializeToString(doc);
 }

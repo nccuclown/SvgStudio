@@ -1,66 +1,114 @@
 import { useState, useEffect, useCallback } from "react";
-import { parseSvgComponents, flattenSvgComponents, updateSvgComponent } from "@/lib/svg-utils";
+import { 
+  parseSvgComponents, 
+  flattenSvgComponents, 
+  findComponentById, 
+  updateSvgComponent,
+  SVGComponent,
+  FlatComponent
+} from "@/lib/svg-utils";
 
+// 默認 SVG 範例
 const DEFAULT_SVG = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
   <rect id="rect1" x="10" y="10" width="80" height="80" fill="blue" />
   <circle id="circle1" cx="150" cy="50" r="40" fill="red" />
   <path id="path1" d="M10 150 L90 150 L50 90 Z" fill="green" />
 </svg>`;
 
-export function useSvgEditor() {
-  const [code, setCode] = useState(DEFAULT_SVG);
-  const [components, setComponents] = useState<Array<{ id: string; type: string; parentId?: string }>>([]);
-  const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
-  const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
+/**
+ * SVG 編輯器自定義 Hook
+ */
+export function useSvgEditor(initialSvg = DEFAULT_SVG) {
+  // SVG 代碼
+  const [svgCode, setSvgCode] = useState<string>(initialSvg);
+
+  // 組件結構
+  const [flatComponents, setFlatComponents] = useState<FlatComponent[]>([]);
+  const [fullComponents, setFullComponents] = useState<SVGComponent[]>([]);
+
+  // 選擇和懸停狀態
+  const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
+  const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(null);
+
+  // 其他狀態
   const [showGrid, setShowGrid] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [fullComponents, setFullComponents] = useState<ReturnType<typeof parseSvgComponents>>([]);
 
+  // 解析 SVG 代碼
   useEffect(() => {
     try {
+      // 驗證 SVG 語法
       const parser = new DOMParser();
-      const doc = parser.parseFromString(code, "image/svg+xml");
+      const doc = parser.parseFromString(svgCode, "image/svg+xml");
       const errorNode = doc.querySelector("parsererror");
 
       if (errorNode) {
-        setValidationError("Invalid SVG syntax");
+        setValidationError("SVG 語法無效");
         return;
       }
 
+      // 清除驗證錯誤
       setValidationError(null);
-      const parsed = parseSvgComponents(code);
-      setFullComponents(parsed);
-      setComponents(flattenSvgComponents(parsed));
-    } catch (err) {
-      setValidationError((err as Error).message);
-    }
-  }, [code]);
 
-  const updateElementProperty = useCallback((id: string, property: string, value: string) => {
+      // 解析 SVG 組件
+      const components = parseSvgComponents(svgCode);
+      setFullComponents(components);
+
+      // 扁平化組件結構
+      const flattened = flattenSvgComponents(components);
+      setFlatComponents(flattened);
+
+    } catch (error) {
+      console.error("解析 SVG 時出錯:", error);
+      setValidationError((error as Error).message);
+    }
+  }, [svgCode]);
+
+  // 更新組件屬性
+  const updateComponentProperty = useCallback((id: string, property: string, value: string) => {
     try {
-      const updatedSvg = updateSvgComponent(code, id, property, value);
-      if (updatedSvg !== code) {
-        setCode(updatedSvg);
-      }
-    } catch (err) {
-      console.error("Failed to update property:", err);
+      const updatedSvg = updateSvgComponent(svgCode, id, property, value);
+      setSvgCode(updatedSvg);
+    } catch (error) {
+      console.error("更新組件屬性時出錯:", error);
     }
-  }, [code]);
+  }, [svgCode]);
 
-  const toggleGrid = () => setShowGrid(!showGrid);
+  // 切換網格顯示
+  const toggleGrid = useCallback(() => {
+    setShowGrid(prev => !prev);
+  }, []);
+
+  // 更新選中組件
+  const selectComponent = useCallback((id: string | null) => {
+    setSelectedComponentId(id);
+  }, []);
+
+  // 更新懸停組件
+  const hoverComponent = useCallback((id: string | null) => {
+    setHoveredComponentId(id);
+  }, []);
+
+  // 獲取選中的組件詳情
+  const getSelectedComponent = useCallback(() => {
+    if (!selectedComponentId || !fullComponents.length) return null;
+
+    return findComponentById(fullComponents, selectedComponentId);
+  }, [selectedComponentId, fullComponents]);
 
   return {
-    code,
-    setCode,
-    components,
-    selectedComponent,
-    setSelectedComponent,
-    hoveredComponent,
-    setHoveredComponent,
+    svgCode,
+    setSvgCode,
+    components: flatComponents,
+    fullComponents,
+    selectedComponentId,
+    selectComponent,
+    hoveredComponentId,
+    hoverComponent,
     showGrid,
     toggleGrid,
     validationError,
-    updateElementProperty,
-    fullComponents,
+    updateComponentProperty,
+    getSelectedComponent
   };
 }

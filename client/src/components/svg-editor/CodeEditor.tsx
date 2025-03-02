@@ -1,20 +1,22 @@
 import { useEffect, useRef } from "react";
-import { EditorView } from "@codemirror/view";
+import { EditorView, lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { xml } from "@codemirror/lang-xml";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { basicSetup } from "codemirror";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { Code as CodeIcon } from "lucide-react";
 
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
-  error: string | null;
   selectedComponent: string | null;
 }
 
-export function CodeEditor({ value, onChange, error, selectedComponent }: CodeEditorProps) {
+export function CodeEditor({
+  value,
+  onChange,
+  selectedComponent
+}: CodeEditorProps) {
   const editorRef = useRef<EditorView>();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +29,7 @@ export function CodeEditor({ value, onChange, error, selectedComponent }: CodeEd
         basicSetup,
         xml(),
         oneDark,
+        lineNumbers(),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString());
@@ -47,6 +50,7 @@ export function CodeEditor({ value, onChange, error, selectedComponent }: CodeEd
     };
   }, []);
 
+  // 更新編輯器內容
   useEffect(() => {
     if (editorRef.current && value !== editorRef.current.state.doc.toString()) {
       editorRef.current.dispatch({
@@ -59,7 +63,7 @@ export function CodeEditor({ value, onChange, error, selectedComponent }: CodeEd
     }
   }, [value]);
 
-  // Scroll to selected component
+  // 滾動到選中的組件
   useEffect(() => {
     if (!selectedComponent || !editorRef.current) return;
 
@@ -71,20 +75,17 @@ export function CodeEditor({ value, onChange, error, selectedComponent }: CodeEd
       const pos = doc.indexOf(match[0]);
       const line = editorRef.current.state.doc.lineAt(pos);
       editorRef.current.dispatch({
-        effects: EditorView.scrollIntoView(pos, { y: 'center' })
+        effects: EditorView.scrollIntoView(line.from, {
+          y: 'center',
+          yMargin: 50
+        })
       });
     }
   }, [selectedComponent]);
 
   return (
-    <div className="h-full flex flex-col">
-      {error && (
-        <Alert variant="destructive" className="mb-2">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <div ref={containerRef} className="flex-1 overflow-auto" />
-    </div>
+    <div ref={containerRef} className="h-full w-full overflow-hidden" />
   );
 }
+
+export { CodeIcon };

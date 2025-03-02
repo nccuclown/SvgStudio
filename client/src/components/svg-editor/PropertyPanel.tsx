@@ -1,83 +1,189 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { SVGComponent } from "@/lib/svg-utils";
 
 interface PropertyPanelProps {
-  selectedComponent: string | null;
-  svg: string;
+  component: SVGComponent | null;
   onPropertyChange: (id: string, property: string, value: string) => void;
-  fullComponents?: Array<{
-    id: string;
-    type: string;
-    attributes: Record<string, string>;
-  }>;
 }
 
-export function PropertyPanel({
-  selectedComponent,
-  onPropertyChange,
-  fullComponents = [],
-}: PropertyPanelProps) {
-  const selectedProperties = useMemo(() => {
-    if (!selectedComponent || !fullComponents) return null;
-    return fullComponents.find(comp => comp.id === selectedComponent);
-  }, [selectedComponent, fullComponents]);
+// 屬性分類
+const BASIC_PROPS = ['x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'width', 'height', 'x1', 'y1', 'x2', 'y2', 'd', 'points'];
+const STYLE_PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'opacity', 'fill-opacity', 'stroke-opacity'];
+const TEXT_PROPS = ['_text', 'text-anchor', 'font-family', 'font-size', 'font-weight'];
+const ANIMATION_PROPS = ['dur', 'repeatCount', 'values', 'attributeName', 'begin', 'from', 'to', 'keyTimes', 'keySplines'];
 
-  if (!selectedProperties) {
+export function PropertyPanel({
+  component,
+  onPropertyChange
+}: PropertyPanelProps) {
+  // 如果沒有選中任何組件，顯示提示
+  if (!component) {
     return (
-      <div className="p-4 text-muted-foreground text-center">
+      <div className="p-4 text-center text-muted-foreground">
         選擇一個元件來查看屬性
       </div>
     );
   }
 
-  return (
-    <div className="h-full">
-      <div className="p-4">
-        <div className="mb-4">
-          <h3 className="text-sm font-medium">
-            {selectedProperties.type} ({selectedProperties.id})
-          </h3>
+  // 分類屬性
+  const propertyGroups = useMemo(() => {
+    if (!component) return {};
+
+    const attributes = component.attributes;
+    const groups: Record<string, [string, string][]> = {
+      basic: [],
+      style: [],
+      text: [],
+      animation: [],
+      other: []
+    };
+
+    // 分類所有屬性
+    Object.entries(attributes).forEach(([key, value]) => {
+      if (BASIC_PROPS.includes(key)) {
+        groups.basic.push([key, value]);
+      } else if (STYLE_PROPS.includes(key) || key.startsWith('style-')) {
+        groups.style.push([key, value]);
+      } else if (TEXT_PROPS.includes(key)) {
+        groups.text.push([key, value]);
+      } else if (ANIMATION_PROPS.includes(key)) {
+        groups.animation.push([key, value]);
+      } else {
+        groups.other.push([key, value]);
+      }
+    });
+
+    return groups;
+  }, [component]);
+
+  // 渲染特定類型的屬性編輯器
+  const renderPropertyEditor = (property: string, value: string) => {
+    // 顏色屬性需要顏色選擇器
+    if (property === 'fill' || property === 'stroke') {
+      return (
+        <div className="flex gap-2">
+          <Input
+            type="color"
+            value={value}
+            className="w-12"
+            onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+          />
+          <Input
+            value={value}
+            className="flex-1"
+            onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+          />
         </div>
-        <ScrollArea className="h-[calc(100%-2rem)]">
-          <div className="space-y-4 pr-4">
-            {Object.entries(selectedProperties.attributes).map(([key, value]) => (
-              <div key={key} className="grid gap-2">
-                <Label htmlFor={key}>{key}</Label>
-                {key === "fill" || key === "stroke" ? (
-                  <div className="flex gap-2">
-                    <Input
-                      id={`${key}-color`}
-                      type="color"
-                      value={value}
-                      className="w-[60px]"
-                      onChange={(e) =>
-                        onPropertyChange(selectedProperties.id, key, e.target.value)
-                      }
-                    />
-                    <Input
-                      id={key}
-                      value={value}
-                      onChange={(e) =>
-                        onPropertyChange(selectedProperties.id, key, e.target.value)
-                      }
-                    />
-                  </div>
-                ) : (
-                  <Input
-                    id={key}
-                    value={value}
-                    onChange={(e) =>
-                      onPropertyChange(selectedProperties.id, key, e.target.value)
-                    }
-                  />
-                )}
-              </div>
-            ))}
+      );
+    }
+
+    // 路徑數據需要多行文本框
+    else if (property === 'd' || property === 'points' || property === '_text') {
+      return (
+        <Textarea
+          value={value}
+          rows={4}
+          onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+        />
+      );
+    }
+
+    // 數值屬性使用數字輸入框
+    else if (['width', 'height', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'opacity', 'stroke-width'].includes(property)) {
+      return (
+        <Input
+          type="number"
+          value={value}
+          step={property.includes('opacity') ? 0.1 : 1}
+          min={property.includes('opacity') ? 0 : undefined}
+          max={property.includes('opacity') ? 1 : undefined}
+          onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+        />
+      );
+    }
+
+    // 默認使用文本輸入框
+    else {
+      return (
+        <Input
+          value={value}
+          onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+        />
+      );
+    }
+  };
+
+  // 渲染屬性組
+  const renderPropertyGroup = (properties: [string, string][]) => {
+    if (properties.length === 0) {
+      return (
+        <div className="text-sm text-muted-foreground py-2">
+          無可用屬性
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {properties.map(([property, value]) => (
+          <div key={property} className="grid gap-2">
+            <Label htmlFor={property}>{property}</Label>
+            {renderPropertyEditor(property, value)}
           </div>
-        </ScrollArea>
+        ))}
       </div>
+    );
+  };
+
+  // 準備要顯示的標籤
+  const visibleTabs = [
+    { id: 'basic', label: '基本', content: propertyGroups.basic },
+    { id: 'style', label: '樣式', content: propertyGroups.style },
+    ...(propertyGroups.text.length ? [{ id: 'text', label: '文本', content: propertyGroups.text }] : []),
+    ...(propertyGroups.animation.length ? [{ id: 'animation', label: '動畫', content: propertyGroups.animation }] : []),
+    ...(propertyGroups.other.length ? [{ id: 'other', label: '其他', content: propertyGroups.other }] : [])
+  ];
+
+  return (
+    <div className="p-4 h-full">
+      <div className="mb-4">
+        <h3 className="text-sm font-medium">
+          {component.type} <span className="text-muted-foreground">({component.id})</span>
+        </h3>
+      </div>
+
+      <Tabs defaultValue="basic">
+        <TabsList className="grid grid-cols-3 mb-4">
+          {visibleTabs.slice(0, 3).map(tab => (
+            <TabsTrigger key={tab.id} value={tab.id}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {visibleTabs.length > 3 && (
+          <TabsList className="grid grid-cols-2 mb-4">
+            {visibleTabs.slice(3).map(tab => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        )}
+
+        <ScrollArea className="h-[calc(100vh-220px)]">
+          {visibleTabs.map(tab => (
+            <TabsContent key={tab.id} value={tab.id} className="p-1">
+              {renderPropertyGroup(tab.content)}
+            </TabsContent>
+          ))}
+        </ScrollArea>
+      </Tabs>
     </div>
   );
 }
