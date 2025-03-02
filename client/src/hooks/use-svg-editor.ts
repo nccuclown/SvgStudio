@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { parseSvgComponents } from "@/lib/svg-utils";
 
 const DEFAULT_SVG = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -20,7 +20,7 @@ export function useSvgEditor() {
       const parser = new DOMParser();
       const doc = parser.parseFromString(code, "image/svg+xml");
       const errorNode = doc.querySelector("parsererror");
-      
+
       if (errorNode) {
         setValidationError("Invalid SVG syntax");
         return;
@@ -30,6 +30,23 @@ export function useSvgEditor() {
       setComponents(parseSvgComponents(code));
     } catch (err) {
       setValidationError((err as Error).message);
+    }
+  }, [code]);
+
+  const updateElementProperty = useCallback((id: string, property: string, value: string) => {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      const element = doc.getElementById(id);
+
+      if (element) {
+        element.setAttribute(property, value);
+        const serializer = new XMLSerializer();
+        const updatedSvg = serializer.serializeToString(doc);
+        setCode(updatedSvg);
+      }
+    } catch (err) {
+      console.error("Failed to update property:", err);
     }
   }, [code]);
 
@@ -46,5 +63,6 @@ export function useSvgEditor() {
     showGrid,
     toggleGrid,
     validationError,
+    updateElementProperty,
   };
 }

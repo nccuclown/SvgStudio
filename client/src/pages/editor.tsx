@@ -1,6 +1,7 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { SplitPane } from "@/components/svg-editor/SplitPane";
 import { ComponentTree } from "@/components/svg-editor/ComponentTree";
+import { PropertyPanel } from "@/components/svg-editor/PropertyPanel";
 import { useSvgEditor } from "@/hooks/use-svg-editor";
 
 export default function Editor() {
@@ -14,19 +15,27 @@ export default function Editor() {
     setHoveredComponent,
     showGrid,
     toggleGrid,
-    validationError
+    validationError,
+    updateElementProperty,
   } = useSvgEditor();
 
   return (
     <div className="h-screen bg-background">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={20} minSize={15}>
-          <div className="h-full p-4 border-r">
-            <ComponentTree
-              components={components}
+          <div className="h-full flex flex-col border-r">
+            <div className="flex-1 p-4">
+              <ComponentTree
+                components={components}
+                selectedComponent={selectedComponent}
+                onSelectComponent={setSelectedComponent}
+                onHoverComponent={setHoveredComponent}
+              />
+            </div>
+            <PropertyPanel
               selectedComponent={selectedComponent}
-              onSelectComponent={setSelectedComponent}
-              onHoverComponent={setHoveredComponent}
+              svg={code}
+              onPropertyChange={updateElementProperty}
             />
           </div>
         </ResizablePanel>
