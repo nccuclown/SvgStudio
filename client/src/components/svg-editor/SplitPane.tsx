@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Grid2X2, Copy, Maximize2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface SplitPaneProps {
   code: string;
@@ -43,14 +44,29 @@ export function SplitPane({
   if (isFullscreen) {
     return (
       <div className="fixed inset-0 bg-background z-50">
-        <div className="absolute top-4 right-4 flex gap-2">
-          <Button variant="outline" size="icon" onClick={onToggleGrid}>
+        <div className="absolute top-4 right-4 flex gap-2 z-10">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={onToggleGrid}
+            className="hover:bg-accent"
+          >
             <Grid2X2 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={handleCopy}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handleCopy}
+            className="hover:bg-accent"
+          >
             <Copy className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={toggleFullscreen}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={toggleFullscreen}
+            className="hover:bg-accent"
+          >
             <Maximize2 className="h-4 w-4" />
           </Button>
         </div>
@@ -72,14 +88,24 @@ export function SplitPane({
           variant="outline"
           size="icon"
           onClick={onToggleGrid}
-          className={showGrid ? "bg-accent" : ""}
+          className={cn("hover:bg-accent", showGrid && "bg-accent")}
         >
           <Grid2X2 className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={handleCopy}>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={handleCopy}
+          className="hover:bg-accent"
+        >
           <Copy className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={toggleFullscreen}>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={toggleFullscreen}
+          className="hover:bg-accent"
+        >
           <Maximize2 className="h-4 w-4" />
         </Button>
       </div>
