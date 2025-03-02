@@ -10,6 +10,7 @@ interface TreeNode {
   id: string;
   type: string;
   parentId?: string;
+  path: number[];
   children: TreeNode[];
   isHidden?: boolean;
 }
@@ -32,6 +33,7 @@ function buildTree(components: FlatComponent[]): TreeNode[] {
       id: comp.id,
       type: comp.type,
       parentId: comp.parentId,
+      path: comp.path,
       children: []
     });
   });
@@ -54,7 +56,20 @@ function buildTree(components: FlatComponent[]): TreeNode[] {
     nodes.sort((a, b) => {
       if (a.type === 'svg' && b.type !== 'svg') return -1;
       if (a.type !== 'svg' && b.type === 'svg') return 1;
-      return a.type.localeCompare(b.type);
+
+      // 按路徑長度和索引排序
+      if (a.path.length !== b.path.length) {
+        return a.path.length - b.path.length;
+      }
+
+      // 相同層級按路徑索引排序
+      for (let i = 0; i < a.path.length; i++) {
+        if (a.path[i] !== b.path[i]) {
+          return a.path[i] - b.path[i];
+        }
+      }
+
+      return 0;
     });
 
     nodes.forEach(node => {
@@ -86,9 +101,14 @@ function TreeNodeComponent({
   const [isExpanded, setIsExpanded] = useState(level === 0);
   const hasChildren = node.children.length > 0;
 
+  // 顯示ID或路徑ID
+  const displayId = node.id.startsWith('path-') 
+    ? `path-${node.path.join('.')}` 
+    : node.id;
+
   // 檢查搜索匹配
   const isMatch = searchTerm && (
-    node.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    displayId.toLowerCase().includes(searchTerm.toLowerCase()) ||
     node.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -146,7 +166,7 @@ function TreeNodeComponent({
             {node.type}
           </span>
           <span className="text-muted-foreground text-xs truncate">
-            ({node.id})
+            ({displayId})
           </span>
         </div>
       </div>
