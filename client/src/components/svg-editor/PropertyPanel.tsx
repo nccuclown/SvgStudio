@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -79,7 +78,7 @@ export function PropertyPanel({
                 {key === "fill" || key === "stroke" ? (
                   <div className="flex gap-2">
                     <Input
-                      id={key}
+                      id={`${key}-color`}
                       type="color"
                       value={value}
                       className="w-[60px]"
@@ -88,6 +87,7 @@ export function PropertyPanel({
                       }
                     />
                     <Input
+                      id={key}
                       value={value}
                       onChange={(e) =>
                         onPropertyChange(elementProperties.id, key, e.target.value)

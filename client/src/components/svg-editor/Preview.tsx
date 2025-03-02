@@ -32,7 +32,9 @@ export function Preview({
     .replace(
       `id="${hoveredComponent}" style="`,
       `id="${hoveredComponent}" style="outline: 2px solid hsl(var(--accent)); outline-offset: 2px; `
-    );
+    )
+    // Ensure SVG is responsive and maintains aspect ratio
+    .replace(/<svg/, '<svg style="width: 100%; height: 100%; max-height: 100vh;"');
 
   return (
     <div className={cn(
@@ -41,7 +43,7 @@ export function Preview({
     )}>
       <div className={cn(
         "min-h-full flex items-center justify-center p-8",
-        isFullscreen && "min-h-screen"
+        isFullscreen ? "min-h-screen" : ""
       )}>
         <div 
           className={cn(
