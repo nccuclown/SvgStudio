@@ -51,13 +51,14 @@ export function CodeEditor({
       "&.cm-focused": {
         outline: "none"
       },
-      // 語法高亮
-      ".cm-keyword": { color: "hsl(var(--primary))" },
-      ".cm-tag": { color: "hsl(var(--secondary))" },
-      ".cm-attribute": { color: "hsl(var(--accent))" },
+      // XML 語法高亮
+      ".cm-tagName": { color: "hsl(var(--primary))" },
+      ".cm-bracket": { color: "hsl(var(--muted-foreground))" },
+      ".cm-attributeName": { color: "hsl(var(--accent))" },
+      ".cm-attributeValue": { color: "hsl(var(--success))" },
+      ".cm-comment": { color: "hsl(var(--muted-foreground))" },
       ".cm-string": { color: "hsl(var(--success))" },
-      ".cm-number": { color: "hsl(var(--warning))" },
-      ".cm-comment": { color: "hsl(var(--muted-foreground))" }
+      ".cm-number": { color: "hsl(var(--warning))" }
     });
 
     const state = EditorState.create({
@@ -123,7 +124,7 @@ export function CodeEditor({
   return (
     <div 
       ref={containerRef} 
-      className="h-full w-full overflow-hidden border rounded-md"
+      className="h-full w-full overflow-hidden bg-background border rounded-md"
     />
   );
 }

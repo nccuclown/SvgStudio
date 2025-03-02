@@ -37,9 +37,7 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
 
     // 獲取所有屬性
     Array.from(element.attributes).forEach(attr => {
-      if (attr.name !== 'id') {
-        attributes[attr.name] = attr.value;
-      }
+      attributes[attr.name] = attr.value;
     });
 
     // 解析樣式屬性
@@ -75,7 +73,7 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
     return attributes;
   }
 
-  function processElement(element: Element, parentId?: string): SVGComponent {
+  function processElement(element: Element, parentId?: string): SVGComponent | null {
     const type = element.tagName.toLowerCase();
 
     // 跳過註釋和處理指令
@@ -101,18 +99,13 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
       children: []
     };
 
-    // 處理子元素，包括動畫元素
+    // 處理子元素
     Array.from(element.childNodes).forEach(node => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const childElement = node as Element;
         const childComponent = processElement(childElement, id);
         if (childComponent) {
           component.children.push(childComponent);
-        }
-      } else if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent?.trim();
-        if (text) {
-          component.attributes['_text'] = text;
         }
       }
     });
@@ -161,8 +154,14 @@ export function findComponentById(components: SVGComponent[], id: string): SVGCo
       return component;
     }
 
-    const found = component.children.find(child => findComponentById([child], id));
+    const found = component.children.find(child => child.id === id);
     if (found) return found;
+
+    // 遞歸搜索子組件
+    for (const child of component.children) {
+      const result = findComponentById([child], id);
+      if (result) return result;
+    }
   }
 
   return null;
