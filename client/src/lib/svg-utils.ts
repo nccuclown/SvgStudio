@@ -17,6 +17,12 @@ export interface FlatComponent {
   parentId?: string;
 }
 
+let uniqueIdCounter = 0;
+
+function generateUniqueId(type: string): string {
+  return `${type}-${uniqueIdCounter++}`;
+}
+
 /**
  * 解析SVG字符串為組件樹
  */
@@ -59,17 +65,17 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
     return attributes;
   }
 
-  function processElement(element: Element, parentId?: string): SVGComponent | null {
-    // 獲取元素類型
+  function processElement(element: Element, parentId?: string): SVGComponent {
     const type = element.tagName.toLowerCase();
 
-    // 跳過註釋和處理指令
-    if (type === '#comment' || type === '#processing-instruction') {
-      return null;
-    }
+    // 保留原始ID或生成新ID
+    const originalId = element.getAttribute('id');
+    const id = originalId || generateUniqueId(type);
 
-    // 使用現有的ID或生成新的ID
-    const id = element.getAttribute('id') || '';
+    // 如果元素沒有ID，添加生成的ID
+    if (!originalId) {
+      element.setAttribute('id', id);
+    }
 
     // 創建組件對象
     const component: SVGComponent = {
@@ -80,14 +86,12 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
       children: []
     };
 
-    // 處理子元素
+    // 處理子元素，包括動畫等特殊元素
     Array.from(element.childNodes).forEach(node => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const childElement = node as Element;
         const childComponent = processElement(childElement, id);
-        if (childComponent) {
-          component.children.push(childComponent);
-        }
+        component.children.push(childComponent);
       }
     });
 
@@ -98,9 +102,7 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
   const svgElement = doc.querySelector('svg');
   if (svgElement) {
     const rootComponent = processElement(svgElement);
-    if (rootComponent) {
-      components.push(rootComponent);
-    }
+    components.push(rootComponent);
   }
 
   return components;
@@ -113,13 +115,11 @@ export function flattenSvgComponents(components: SVGComponent[]): FlatComponent[
   const result: FlatComponent[] = [];
 
   function flatten(component: SVGComponent) {
-    if (component.id) {
-      result.push({
-        id: component.id,
-        type: component.type,
-        parentId: component.parentId
-      });
-    }
+    result.push({
+      id: component.id,
+      type: component.type,
+      parentId: component.parentId
+    });
 
     component.children.forEach(child => flatten(child));
   }
