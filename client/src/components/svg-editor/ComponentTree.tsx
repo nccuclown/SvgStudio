@@ -5,6 +5,12 @@ import { ChevronRight, ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { FlatComponent } from "@/lib/svg-utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TreeNode {
   id: string;
@@ -12,6 +18,7 @@ interface TreeNode {
   parentId?: string;
   path: number[];
   children: TreeNode[];
+  attributes: Record<string, string>;
   isHidden?: boolean;
 }
 
@@ -20,6 +27,54 @@ interface ComponentTreeProps {
   selectedComponent: string | null;
   onSelectComponent: (id: string) => void;
   onHoverComponent: (id: string | null) => void;
+}
+
+// 獲取元素的描述性信息
+function getElementDescription(node: TreeNode): string {
+  const attrs = node.attributes || {};
+  let desc = '';
+
+  // 文本內容
+  if (attrs['_text']) {
+    desc += `"${attrs['_text'].slice(0, 20)}${attrs['_text'].length > 20 ? '...' : ''}" `;
+  }
+
+  // 位置信息
+  const position = [];
+  if (attrs.x) position.push(`x:${attrs.x}`);
+  if (attrs.y) position.push(`y:${attrs.y}`);
+  if (attrs.cx) position.push(`cx:${attrs.cx}`);
+  if (attrs.cy) position.push(`cy:${attrs.cy}`);
+  if (position.length) {
+    desc += `at (${position.join(', ')}) `;
+  }
+
+  // 尺寸信息
+  const size = [];
+  if (attrs.width) size.push(`w:${attrs.width}`);
+  if (attrs.height) size.push(`h:${attrs.height}`);
+  if (attrs.r) size.push(`r:${attrs.r}`);
+  if (size.length) {
+    desc += `size(${size.join('×')}) `;
+  }
+
+  // 顏色信息
+  if (attrs.fill && attrs.fill !== 'none') {
+    desc += `fill:${attrs.fill} `;
+  }
+  if (attrs.stroke && attrs.stroke !== 'none') {
+    desc += `stroke:${attrs.stroke} `;
+  }
+
+  // 特殊屬性
+  if (attrs.class) {
+    desc += `class:${attrs.class} `;
+  }
+  if (attrs.style) {
+    desc += `[styled] `;
+  }
+
+  return desc.trim();
 }
 
 // 建立樹狀結構
@@ -33,7 +88,8 @@ function buildTree(components: FlatComponent[]): TreeNode[] {
       id: comp.id,
       type: comp.type,
       parentId: comp.parentId,
-      path: comp.path,
+      path: comp.path || [],
+      attributes: comp.attributes || {},
       children: []
     });
   });
@@ -101,15 +157,14 @@ function TreeNodeComponent({
   const [isExpanded, setIsExpanded] = useState(level === 0);
   const hasChildren = node.children.length > 0;
 
-  // 顯示ID或路徑ID
-  const displayId = node.id.startsWith('path-') 
-    ? `path-${node.path.join('.')}` 
-    : node.id;
+  // 元素描述
+  const description = getElementDescription(node);
 
   // 檢查搜索匹配
   const isMatch = searchTerm && (
-    displayId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    node.type.toLowerCase().includes(searchTerm.toLowerCase())
+    node.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    node.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // 處理展開/收起按鈕點擊
@@ -153,22 +208,33 @@ function TreeNodeComponent({
           <div className="w-6" />
         )}
 
-        <div
-          className="flex-1 flex items-center cursor-pointer text-sm pl-1 py-0.5"
-          onMouseEnter={() => onHoverComponent(node.id)}
-          onMouseLeave={() => onHoverComponent(null)}
-          onClick={handleNodeClick}
-        >
-          <span className={cn(
-            "font-medium mr-1",
-            isMatch && "text-primary"
-          )}>
-            {node.type}
-          </span>
-          <span className="text-muted-foreground text-xs truncate">
-            ({displayId})
-          </span>
-        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className="flex-1 flex items-center cursor-pointer text-sm pl-1 py-0.5"
+                onMouseEnter={() => onHoverComponent(node.id)}
+                onMouseLeave={() => onHoverComponent(null)}
+                onClick={handleNodeClick}
+              >
+                <span className={cn(
+                  "font-medium mr-1",
+                  isMatch && "text-primary"
+                )}>
+                  {node.type}
+                </span>
+                {description && (
+                  <span className="text-muted-foreground text-xs truncate">
+                    ({description})
+                  </span>
+                )}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{description || '無描述'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {hasChildren && isExpanded && (
