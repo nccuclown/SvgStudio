@@ -2,8 +2,9 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { CodeEditor } from "./CodeEditor";
 import { Preview } from "./Preview";
 import { Button } from "@/components/ui/button";
-import { Grid2X2, Copy } from "lucide-react";
+import { Grid2X2, Copy, Maximize2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface SplitPaneProps {
   code: string;
@@ -25,6 +26,7 @@ export function SplitPane({
   validationError,
 }: SplitPaneProps) {
   const { toast } = useToast();
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
@@ -33,6 +35,32 @@ export function SplitPane({
       description: "SVG code copied to clipboard",
     });
   };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 bg-background z-50">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <Button variant="outline" size="icon" onClick={onToggleGrid}>
+            <Grid2X2 className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={toggleFullscreen}>
+            <Maximize2 className="h-4 w-4" />
+          </Button>
+        </div>
+        <Preview
+          svg={code}
+          showGrid={showGrid}
+          selectedComponent={selectedComponent}
+          hoveredComponent={hoveredComponent}
+          isFullscreen={true}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -48,9 +76,12 @@ export function SplitPane({
         <Button variant="outline" size="icon" onClick={handleCopy}>
           <Copy className="h-4 w-4" />
         </Button>
+        <Button variant="outline" size="icon" onClick={toggleFullscreen}>
+          <Maximize2 className="h-4 w-4" />
+        </Button>
       </div>
       <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={50}>
+        <ResizablePanel defaultSize={40} minSize={30}>
           <CodeEditor
             value={code}
             onChange={onCodeChange}
@@ -59,12 +90,13 @@ export function SplitPane({
           />
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={50}>
+        <ResizablePanel defaultSize={60} minSize={40}>
           <Preview
             svg={code}
             showGrid={showGrid}
             selectedComponent={selectedComponent}
             hoveredComponent={hoveredComponent}
+            isFullscreen={false}
           />
         </ResizablePanel>
       </ResizablePanelGroup>
