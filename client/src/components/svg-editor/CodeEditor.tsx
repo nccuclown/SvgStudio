@@ -29,36 +29,35 @@ export function CodeEditor({
       },
       ".cm-content": {
         fontFamily: "monospace",
-        backgroundColor: "hsl(var(--background))",
-        color: "hsl(var(--foreground))",
-        caretColor: "hsl(var(--primary))"
+        backgroundColor: "#1e1e1e",
+        color: "#d4d4d4",
       },
       ".cm-gutters": {
-        backgroundColor: "hsl(var(--muted))",
-        color: "hsl(var(--muted-foreground))",
+        backgroundColor: "#1e1e1e",
+        color: "#858585",
         border: "none",
-        borderRight: "1px solid hsl(var(--border))"
+        borderRight: "1px solid #404040"
       },
       ".cm-line": {
         padding: "0 4px"
       },
       ".cm-selectionBackground": {
-        backgroundColor: "hsl(var(--accent)/.5) !important"
+        backgroundColor: "rgba(81, 92, 106, 0.4) !important"
       },
       ".cm-cursor": {
-        borderLeftColor: "hsl(var(--primary))"
+        borderLeftColor: "#fff"
       },
       "&.cm-focused": {
         outline: "none"
       },
       // XML 語法高亮
-      ".cm-tagName": { color: "hsl(var(--primary))" },
-      ".cm-bracket": { color: "hsl(var(--muted-foreground))" },
-      ".cm-attributeName": { color: "hsl(var(--accent))" },
-      ".cm-attributeValue": { color: "hsl(var(--success))" },
-      ".cm-comment": { color: "hsl(var(--muted-foreground))" },
-      ".cm-string": { color: "hsl(var(--success))" },
-      ".cm-number": { color: "hsl(var(--warning))" }
+      ".cm-tagName": { color: "#569cd6" },
+      ".cm-bracket": { color: "#808080" },
+      ".cm-attributeName": { color: "#9cdcfe" },
+      ".cm-attributeValue": { color: "#ce9178" },
+      ".cm-comment": { color: "#6a9955" },
+      ".cm-string": { color: "#ce9178" },
+      ".cm-number": { color: "#b5cea8" }
     });
 
     const state = EditorState.create({
@@ -124,7 +123,7 @@ export function CodeEditor({
   return (
     <div 
       ref={containerRef} 
-      className="h-full w-full overflow-hidden bg-background border rounded-md"
+      className="h-full w-full overflow-hidden"
     />
   );
 }

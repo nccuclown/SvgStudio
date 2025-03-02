@@ -53,7 +53,7 @@ export function PropertyPanel({
         groups.text.push([key, value]);
       } else if (ANIMATION_PROPS.includes(key)) {
         groups.animation.push([key, value]);
-      } else {
+      } else if (key !== 'id') { // 排除 id 屬性
         groups.other.push([key, value]);
       }
     });
@@ -63,20 +63,26 @@ export function PropertyPanel({
 
   // 渲染特定類型的屬性編輯器
   const renderPropertyEditor = (property: string, value: string) => {
+    const handleChange = (newValue: string) => {
+      // 如果是樣式屬性，需要添加 style- 前綴
+      const actualProperty = property.startsWith('style-') ? property : property;
+      onPropertyChange(component.id, actualProperty, newValue);
+    };
+
     // 顏色屬性需要顏色選擇器
-    if (property === 'fill' || property === 'stroke') {
+    if (property === 'fill' || property === 'stroke' || property === 'style-fill' || property === 'style-stroke') {
       return (
         <div className="flex gap-2">
           <Input
             type="color"
             value={value}
             className="w-12"
-            onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
           />
           <Input
             value={value}
             className="flex-1"
-            onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
           />
         </div>
       );
@@ -88,13 +94,16 @@ export function PropertyPanel({
         <Textarea
           value={value}
           rows={4}
-          onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
         />
       );
     }
 
     // 數值屬性使用數字輸入框
-    else if (['width', 'height', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'opacity', 'stroke-width'].includes(property)) {
+    else if (
+      ['width', 'height', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'opacity', 'stroke-width']
+        .includes(property) || property.match(/^style-(opacity|stroke-width)$/)
+    ) {
       return (
         <Input
           type="number"
@@ -102,7 +111,7 @@ export function PropertyPanel({
           step={property.includes('opacity') ? 0.1 : 1}
           min={property.includes('opacity') ? 0 : undefined}
           max={property.includes('opacity') ? 1 : undefined}
-          onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
         />
       );
     }
@@ -112,7 +121,7 @@ export function PropertyPanel({
       return (
         <Input
           value={value}
-          onChange={(e) => onPropertyChange(component.id, property, e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
         />
       );
     }

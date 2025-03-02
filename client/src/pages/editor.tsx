@@ -3,7 +3,7 @@ import { useSvgEditor } from "@/hooks/use-svg-editor";
 import { ComponentTree } from "@/components/svg-editor/ComponentTree";
 import { Preview } from "@/components/svg-editor/Preview";
 import { PropertyPanel } from "@/components/svg-editor/PropertyPanel";
-import { Code } from "@/components/svg-editor/Code";
+import { CodeEditor } from "@/components/svg-editor/CodeEditor";
 import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
@@ -11,7 +11,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid, Image, Maximize, Minimize, Settings } from "lucide-react";
+import { Grid, Image, Maximize, Minimize } from "lucide-react";
 import { findComponentById } from "@/lib/svg-utils";
 
 export default function Editor() {
@@ -88,7 +88,18 @@ export default function Editor() {
                   預覽
                 </TabsTrigger>
                 <TabsTrigger value="code">
-                  <Code className="h-4 w-4 mr-2" />
+                  <svg
+                    className="h-4 w-4 mr-2"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="16 18 22 12 16 6" />
+                    <polyline points="8 6 2 12 8 18" />
+                  </svg>
                   代碼
                 </TabsTrigger>
               </TabsList>
@@ -105,13 +116,11 @@ export default function Editor() {
             </TabsContent>
 
             <TabsContent value="code" className="flex-1 p-0">
-              <div className="h-full">
-                <textarea
-                  value={svgCode}
-                  onChange={(e) => setSvgCode(e.target.value)}
-                  className="w-full h-full resize-none p-4 font-mono text-sm"
-                />
-              </div>
+              <CodeEditor
+                value={svgCode}
+                onChange={setSvgCode}
+                selectedComponent={selectedComponentId}
+              />
             </TabsContent>
           </Tabs>
         </ResizablePanel>
