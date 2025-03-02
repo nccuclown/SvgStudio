@@ -20,7 +20,8 @@ export interface FlatComponent {
 let uniqueIdCounter = 0;
 
 function generateUniqueId(type: string): string {
-  return `${type}-${uniqueIdCounter++}`;
+  // 確保生成的ID不會與原始ID衝突
+  return `generated-${type}-${uniqueIdCounter++}`;
 }
 
 /**
@@ -68,14 +69,9 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
   function processElement(element: Element, parentId?: string): SVGComponent {
     const type = element.tagName.toLowerCase();
 
-    // 保留原始ID或生成新ID
-    const originalId = element.getAttribute('id');
-    const id = originalId || generateUniqueId(type);
+    // 保留原始ID，只在沒有ID時生成新ID
+    const id = element.getAttribute('id') || generateUniqueId(type);
 
-    // 如果元素沒有ID，添加生成的ID
-    if (!originalId) {
-      element.setAttribute('id', id);
-    }
 
     // 創建組件對象
     const component: SVGComponent = {
@@ -86,7 +82,7 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
       children: []
     };
 
-    // 處理子元素，包括動畫等特殊元素
+    // 處理子元素
     Array.from(element.childNodes).forEach(node => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const childElement = node as Element;
@@ -190,50 +186,45 @@ export function updateSvgComponent(
       }))
     });
 
-    try {
-      // 特殊屬性處理
-      if (propertyName === '_text') {
-        console.log(`[updateSvgComponent] 更新文本內容`);
-        element.textContent = propertyValue;
-      }
-      // 樣式屬性處理
-      else if (propertyName.startsWith('style-')) {
-        console.log(`[updateSvgComponent] 更新樣式屬性`);
-        const styleName = propertyName.replace('style-', '');
-        const currentStyle = element.getAttribute('style') || '';
+    // 特殊屬性處理
+    if (propertyName === '_text') {
+      console.log(`[updateSvgComponent] 更新文本內容`);
+      element.textContent = propertyValue;
+    }
+    // 樣式屬性處理
+    else if (propertyName.startsWith('style-')) {
+      console.log(`[updateSvgComponent] 更新樣式屬性`);
+      const styleName = propertyName.replace('style-', '');
+      const currentStyle = element.getAttribute('style') || '';
 
-        // 解析當前樣式
-        const styles = new Map();
-        currentStyle.split(';').forEach(pair => {
-          const [name, value] = pair.split(':').map(s => s.trim());
-          if (name && value) {
-            styles.set(name, value);
-          }
-        });
-
-        // 更新或添加新樣式
-        styles.set(styleName, propertyValue);
-
-        // 重建樣式字符串
-        const newStyle = Array.from(styles.entries())
-          .map(([name, value]) => `${name}: ${value}`)
-          .join('; ');
-
-        console.log(`[updateSvgComponent] 新的樣式字符串:`, newStyle);
-        element.setAttribute('style', newStyle);
-      }
-      // 一般屬性處理
-      else {
-        console.log(`[updateSvgComponent] 更新一般屬性`);
-        if (propertyValue === '') {
-          element.removeAttribute(propertyName);
-        } else {
-          element.setAttribute(propertyName, propertyValue);
+      // 解析當前樣式
+      const styles = new Map();
+      currentStyle.split(';').forEach(pair => {
+        const [name, value] = pair.split(':').map(s => s.trim());
+        if (name && value) {
+          styles.set(name, value);
         }
+      });
+
+      // 更新或添加新樣式
+      styles.set(styleName, propertyValue);
+
+      // 重建樣式字符串
+      const newStyle = Array.from(styles.entries())
+        .map(([name, value]) => `${name}: ${value}`)
+        .join('; ');
+
+      console.log(`[updateSvgComponent] 新的樣式字符串:`, newStyle);
+      element.setAttribute('style', newStyle);
+    }
+    // 一般屬性處理
+    else {
+      console.log(`[updateSvgComponent] 更新一般屬性`);
+      if (propertyValue === '') {
+        element.removeAttribute(propertyName);
+      } else {
+        element.setAttribute(propertyName, propertyValue);
       }
-    } catch (attrError) {
-      console.error(`[updateSvgComponent] 更新屬性時出錯:`, attrError);
-      return svgString;
     }
 
     // 序列化並返回更新後的SVG

@@ -1,0 +1,261 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-87
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-87"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-87
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-87"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-87
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-87"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-87
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-87"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-87
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-87"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-87
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-87"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-87
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-87"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-87
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-87"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-89
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-89"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-89
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-89"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-89
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-89"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-89
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-89"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-89
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-89"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-89
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-89"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: circle-89
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "circle-89"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
+PropertyPanel.tsx:67 [PropertyPanel] 屬性變更: Object
+use-svg-editor.ts:69 [updateComponentProperty] 開始更新組件屬性: Object
+use-svg-editor.ts:76 [updateComponentProperty] 當前 SVG 代碼長度: 18439
+svg-utils.ts:159 [updateSvgComponent] 開始更新組件屬性: Object
+svg-utils.ts:166 [updateSvgComponent] 解析 SVG 字符串...
+svg-utils.ts:177 [updateSvgComponent] 查找目標元素: text-90
+svg-utils.ts:181 [updateSvgComponent] 未找到元素 "text-90"
+updateSvgComponent @ svg-utils.ts:181Understand this warningAI
+use-svg-editor.ts:83 [updateComponentProperty] SVG 未發生變化
+(anonymous) @ use-svg-editor.ts:83Understand this warningAI
