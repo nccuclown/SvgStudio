@@ -14,7 +14,15 @@ export interface FlatComponent {
   id: string;
   type: string;
   parentId?: string;
-  attributes: Record<string, string>; // 添加 attributes
+  attributes: Record<string, string>;
+}
+
+let uniqueIdCounter = 0;
+
+function generateUniqueId(parentId: string | undefined, type: string): string {
+  // 如果有父ID，使用父ID作為前綴
+  const prefix = parentId ? `${parentId}-` : '';
+  return `${prefix}${type}-${uniqueIdCounter++}`;
 }
 
 /**
@@ -61,7 +69,14 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
 
   function processElement(element: Element, parentId?: string): SVGComponent {
     const type = element.tagName.toLowerCase();
-    const id = element.getAttribute('id') || generateUniqueId(type);
+
+    // 優先使用原始ID，如果沒有則基於父ID生成新ID
+    let id = element.getAttribute('id');
+    if (!id) {
+      id = generateUniqueId(parentId, type);
+      // 為元素添加生成的ID
+      element.setAttribute('id', id);
+    }
 
     // 創建組件對象
     const component: SVGComponent = {
@@ -113,23 +128,7 @@ export function flattenSvgComponents(components: SVGComponent[]): FlatComponent[
 }
 
 /**
- * 使用路徑查找元素
- */
-function findElementByPath(doc: Document, path: number[]): Element | null {
-  let current: Element | null = doc.documentElement;
-
-  for (const index of path) {
-    if (!current || !current.children[index]) {
-      return null;
-    }
-    current = current.children[index];
-  }
-
-  return current;
-}
-
-/**
- * 在組件樹中查找特定元素
+ * 在組件樹中查找特定ID的組件
  */
 export function findComponentById(components: SVGComponent[], id: string): SVGComponent | null {
   for (const component of components) {
@@ -153,13 +152,19 @@ export function updateSvgComponent(
   propertyName: string,
   propertyValue: string
 ): string {
+  console.log(`[updateSvgComponent] 開始更新組件屬性:`, {
+    componentId,
+    propertyName,
+    propertyValue
+  });
+
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgString, "image/svg+xml");
     const element = doc.getElementById(componentId);
 
     if (!element) {
-      console.warn(`未找到元素: ${componentId}`);
+      console.warn(`[updateSvgComponent] 未找到元素 "${componentId}"`);
       return svgString;
     }
 
@@ -169,8 +174,9 @@ export function updateSvgComponent(
     } else if (propertyName.startsWith('style-')) {
       const styleName = propertyName.replace('style-', '');
       const currentStyle = element.getAttribute('style') || '';
-      const styles = new Map();
 
+      // 解析當前樣式
+      const styles = new Map();
       currentStyle.split(';').forEach(pair => {
         const [name, value] = pair.split(':').map(s => s.trim());
         if (name && value) {
@@ -178,7 +184,10 @@ export function updateSvgComponent(
         }
       });
 
+      // 更新或添加新樣式
       styles.set(styleName, propertyValue);
+
+      // 重建樣式字符串
       const newStyle = Array.from(styles.entries())
         .map(([name, value]) => `${name}: ${value}`)
         .join('; ');
@@ -199,10 +208,4 @@ export function updateSvgComponent(
     console.error("更新SVG元素屬性時出錯:", error);
     return svgString;
   }
-}
-
-let uniqueIdCounter = 0;
-
-function generateUniqueId(type: string): string {
-  return `${type}-${uniqueIdCounter++}`;
 }

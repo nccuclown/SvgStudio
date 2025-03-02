@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronDown, Search } from "lucide-react";
@@ -16,9 +16,8 @@ interface TreeNode {
   id: string;
   type: string;
   parentId?: string;
-  path: number[];
-  children: TreeNode[];
   attributes: Record<string, string>;
+  children: TreeNode[];
   isHidden?: boolean;
 }
 
@@ -88,7 +87,6 @@ function buildTree(components: FlatComponent[]): TreeNode[] {
       id: comp.id,
       type: comp.type,
       parentId: comp.parentId,
-      path: comp.path || [],
       attributes: comp.attributes || {},
       children: []
     });
@@ -113,19 +111,11 @@ function buildTree(components: FlatComponent[]): TreeNode[] {
       if (a.type === 'svg' && b.type !== 'svg') return -1;
       if (a.type !== 'svg' && b.type === 'svg') return 1;
 
-      // 按路徑長度和索引排序
-      if (a.path.length !== b.path.length) {
-        return a.path.length - b.path.length;
-      }
+      // g 標籤優先顯示
+      if (a.type === 'g' && b.type !== 'g') return -1;
+      if (a.type !== 'g' && b.type === 'g') return 1;
 
-      // 相同層級按路徑索引排序
-      for (let i = 0; i < a.path.length; i++) {
-        if (a.path[i] !== b.path[i]) {
-          return a.path[i] - b.path[i];
-        }
-      }
-
-      return 0;
+      return a.type.localeCompare(b.type);
     });
 
     nodes.forEach(node => {
@@ -154,7 +144,7 @@ function TreeNodeComponent({
   onHoverComponent: (id: string | null) => void;
   searchTerm?: string;
 }) {
-  const [isExpanded, setIsExpanded] = useState(level === 0);
+  const [isExpanded, setIsExpanded] = useState(level === 0 || node.type === 'g');
   const hasChildren = node.children.length > 0;
 
   // 元素描述
@@ -212,26 +202,28 @@ function TreeNodeComponent({
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                className="flex-1 flex items-center cursor-pointer text-sm pl-1 py-0.5"
+                className="flex-1 flex items-center gap-2 cursor-pointer text-sm pl-1 py-0.5"
                 onMouseEnter={() => onHoverComponent(node.id)}
                 onMouseLeave={() => onHoverComponent(null)}
                 onClick={handleNodeClick}
               >
                 <span className={cn(
-                  "font-medium mr-1",
+                  "font-medium",
+                  node.type === 'g' && "text-yellow-500",
                   isMatch && "text-primary"
                 )}>
                   {node.type}
                 </span>
                 {description && (
-                  <span className="text-muted-foreground text-xs truncate">
-                    ({description})
+                  <span className="text-muted-foreground text-xs truncate max-w-[300px]">
+                    {description}
                   </span>
                 )}
               </div>
             </TooltipTrigger>
             <TooltipContent>
               <p>{description || '無描述'}</p>
+              <p className="text-xs text-muted-foreground">ID: {node.id}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -264,9 +256,7 @@ export function ComponentTree({
 }: ComponentTreeProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const treeData = useMemo(() => {
-    return buildTree(components);
-  }, [components]);
+  const treeData = buildTree(components);
 
   return (
     <div className="h-full flex flex-col">
