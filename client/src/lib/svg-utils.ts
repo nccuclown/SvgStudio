@@ -24,7 +24,6 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, "image/svg+xml");
   const components: SVGComponent[] = [];
-  let counter = 0;
 
   // 檢查解析錯誤
   const errorNode = doc.querySelector("parsererror");
@@ -61,6 +60,7 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
   }
 
   function processElement(element: Element, parentId?: string): SVGComponent | null {
+    // 獲取元素類型
     const type = element.tagName.toLowerCase();
 
     // 跳過註釋和處理指令
@@ -68,14 +68,8 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
       return null;
     }
 
-    // 獲取或生成元素ID
-    let id = element.getAttribute('id') || '';
-    if (!id) {
-      id = parentId ?
-        `${parentId}-${type}-${counter++}` :
-        `${type}-${counter++}`;
-      element.setAttribute('id', id);
-    }
+    // 使用現有的ID或生成新的ID
+    const id = element.getAttribute('id') || '';
 
     // 創建組件對象
     const component: SVGComponent = {
@@ -119,11 +113,13 @@ export function flattenSvgComponents(components: SVGComponent[]): FlatComponent[
   const result: FlatComponent[] = [];
 
   function flatten(component: SVGComponent) {
-    result.push({
-      id: component.id,
-      type: component.type,
-      parentId: component.parentId
-    });
+    if (component.id) {
+      result.push({
+        id: component.id,
+        type: component.type,
+        parentId: component.parentId
+      });
+    }
 
     component.children.forEach(child => flatten(child));
   }
@@ -141,9 +137,6 @@ export function findComponentById(components: SVGComponent[], id: string): SVGCo
       return component;
     }
 
-    const found = component.children.find(child => child.id === id);
-    if (found) return found;
-
     // 遞歸搜索子組件
     for (const child of component.children) {
       const result = findComponentById([child], id);
@@ -155,7 +148,7 @@ export function findComponentById(components: SVGComponent[], id: string): SVGCo
 }
 
 /**
- * Updates a specific component's attribute in the SVG string
+ * 更新SVG組件的屬性
  */
 export function updateSvgComponent(
   svgString: string,
