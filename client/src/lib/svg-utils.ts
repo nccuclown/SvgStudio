@@ -17,14 +17,6 @@ export interface FlatComponent {
   attributes: Record<string, string>;
 }
 
-let uniqueIdCounter = 0;
-
-function generateUniqueId(parentId: string | undefined, type: string): string {
-  // 如果有父ID，使用父ID作為前綴
-  const prefix = parentId ? `${parentId}-` : '';
-  return `${prefix}${type}-${uniqueIdCounter++}`;
-}
-
 /**
  * 解析SVG字符串為組件樹
  */
@@ -67,29 +59,21 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
     return attributes;
   }
 
-  function processElement(element: Element, parentId?: string): SVGComponent {
+  function processElement(element: Element, parentComponent?: SVGComponent): SVGComponent {
     const type = element.tagName.toLowerCase();
 
-    // 優先使用原始ID，如果沒有則基於父ID生成新ID
-    let id = element.getAttribute('id');
-    if (!id) {
-      id = generateUniqueId(parentId, type);
-      // 為元素添加生成的ID
-      element.setAttribute('id', id);
-    }
-
-    // 創建組件對象
+    // 創建組件對象，使用原始ID
     const component: SVGComponent = {
-      id,
+      id: element.getAttribute('id') || '', // 保持原始ID
       type,
-      parentId,
+      parentId: parentComponent?.id,
       attributes: getElementAttributes(element),
       children: []
     };
 
     // 處理子元素
     Array.from(element.children).forEach(child => {
-      const childComponent = processElement(child, id);
+      const childComponent = processElement(child, component);
       component.children.push(childComponent);
     });
 
@@ -161,12 +145,35 @@ export function updateSvgComponent(
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgString, "image/svg+xml");
-    const element = doc.getElementById(componentId);
+
+    // 遞歸查找元素
+    function findElementById(element: Element, id: string): Element | null {
+      if (element.getAttribute('id') === id) {
+        return element;
+      }
+
+      for (const child of Array.from(element.children)) {
+        const found = findElementById(child, id);
+        if (found) return found;
+      }
+
+      return null;
+    }
+
+    // 從根元素開始查找
+    const svgRoot = doc.documentElement;
+    const element = findElementById(svgRoot, componentId);
 
     if (!element) {
       console.warn(`[updateSvgComponent] 未找到元素 "${componentId}"`);
       return svgString;
     }
+
+    console.log(`[updateSvgComponent] 找到元素:`, {
+      type: element.tagName,
+      currentId: element.getAttribute('id'),
+      parentId: element.parentElement?.getAttribute('id')
+    });
 
     // 更新屬性
     if (propertyName === '_text') {
