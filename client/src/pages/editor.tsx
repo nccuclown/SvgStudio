@@ -23,21 +23,26 @@ export default function Editor() {
     <div className="h-screen bg-background">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={20} minSize={15}>
-          <div className="h-full flex flex-col border-r">
-            <div className="flex-1 p-4">
-              <ComponentTree
-                components={components}
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel defaultSize={70}>
+              <div className="h-full p-4">
+                <ComponentTree
+                  components={components}
+                  selectedComponent={selectedComponent}
+                  onSelectComponent={setSelectedComponent}
+                  onHoverComponent={setHoveredComponent}
+                />
+              </div>
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel defaultSize={30}>
+              <PropertyPanel
                 selectedComponent={selectedComponent}
-                onSelectComponent={setSelectedComponent}
-                onHoverComponent={setHoveredComponent}
+                svg={code}
+                onPropertyChange={updateElementProperty}
               />
-            </div>
-            <PropertyPanel
-              selectedComponent={selectedComponent}
-              svg={code}
-              onPropertyChange={updateElementProperty}
-            />
-          </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={80}>

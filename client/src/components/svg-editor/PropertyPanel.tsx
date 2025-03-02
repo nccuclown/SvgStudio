@@ -56,22 +56,22 @@ export function PropertyPanel({
 
   if (!elementProperties) {
     return (
-      <div className="h-[200px] border-t flex items-center justify-center text-muted-foreground">
+      <div className="p-4 text-muted-foreground text-center">
         選擇一個元件來查看屬性
       </div>
     );
   }
 
   return (
-    <div className="h-[200px] border-t">
+    <div className="h-full">
       <div className="p-4">
         <div className="mb-4">
           <h3 className="text-sm font-medium">
             {elementProperties.type} ({elementProperties.id})
           </h3>
         </div>
-        <ScrollArea className="h-[140px] pr-4">
-          <div className="space-y-4">
+        <ScrollArea className="h-[calc(100%-2rem)]">
+          <div className="space-y-4 pr-4">
             {Object.entries(elementProperties.properties).map(([key, value]) => (
               <div key={key} className="grid gap-2">
                 <Label htmlFor={key}>{key}</Label>

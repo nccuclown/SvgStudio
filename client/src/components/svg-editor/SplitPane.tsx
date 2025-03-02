@@ -31,8 +31,8 @@ export function SplitPane({
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     toast({
-      title: "Copied!",
-      description: "SVG code copied to clipboard",
+      title: "已複製",
+      description: "SVG 代碼已複製到剪貼板",
     });
   };
 
@@ -46,6 +46,9 @@ export function SplitPane({
         <div className="absolute top-4 right-4 flex gap-2">
           <Button variant="outline" size="icon" onClick={onToggleGrid}>
             <Grid2X2 className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={handleCopy}>
+            <Copy className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="icon" onClick={toggleFullscreen}>
             <Maximize2 className="h-4 w-4" />

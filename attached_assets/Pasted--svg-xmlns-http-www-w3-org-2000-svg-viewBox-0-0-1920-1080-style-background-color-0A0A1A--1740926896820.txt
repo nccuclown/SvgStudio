@@ -1,0 +1,290 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" style="background-color: #0A0A1A;">
+  <!-- 背景點狀星空效果 -->
+  <g id="stars" opacity="0.3">
+    <circle cx="200" cy="150" r="1.2" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite" /></circle>
+    <circle cx="400" cy="220" r="1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.7;0.3" dur="4s" repeatCount="indefinite" /></circle>
+    <circle cx="600" cy="180" r="0.8" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="5s" repeatCount="indefinite" /></circle>
+    <circle cx="800" cy="250" r="1.3" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="4.5s" repeatCount="indefinite" /></circle>
+    <circle cx="1000" cy="170" r="1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="3.5s" repeatCount="indefinite" /></circle>
+    <circle cx="1200" cy="230" r="1.2" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.7;0.3" dur="4.2s" repeatCount="indefinite" /></circle>
+    <circle cx="1400" cy="190" r="0.9" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="5.2s" repeatCount="indefinite" /></circle>
+    <circle cx="1600" cy="280" r="1.1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="3.8s" repeatCount="indefinite" /></circle>
+    <circle cx="300" cy="350" r="0.7" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.7;0.3" dur="4.7s" repeatCount="indefinite" /></circle>
+    <circle cx="500" cy="420" r="1.1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="3.3s" repeatCount="indefinite" /></circle>
+    <circle cx="700" cy="380" r="0.9" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="4.9s" repeatCount="indefinite" /></circle>
+    <circle cx="900" cy="450" r="1.3" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="3.7s" repeatCount="indefinite" /></circle>
+    <circle cx="1100" cy="370" r="1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.7;0.3" dur="5.3s" repeatCount="indefinite" /></circle>
+    <circle cx="1300" cy="430" r="1.2" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="4.1s" repeatCount="indefinite" /></circle>
+    <circle cx="1500" cy="390" r="0.8" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="3.9s" repeatCount="indefinite" /></circle>
+    <circle cx="1700" cy="480" r="1.1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="4.6s" repeatCount="indefinite" /></circle>
+    <circle cx="250" cy="550" r="0.7" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.7;0.3" dur="3.4s" repeatCount="indefinite" /></circle>
+    <circle cx="450" cy="620" r="1.1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="5.1s" repeatCount="indefinite" /></circle>
+    <circle cx="650" cy="580" r="0.9" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="3.6s" repeatCount="indefinite" /></circle>
+    <circle cx="850" cy="650" r="1.3" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="4.8s" repeatCount="indefinite" /></circle>
+    <circle cx="1050" cy="570" r="1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.7;0.3" dur="3.2s" repeatCount="indefinite" /></circle>
+    <circle cx="1250" cy="630" r="1.2" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="5.4s" repeatCount="indefinite" /></circle>
+    <circle cx="1450" cy="590" r="0.8" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="4.4s" repeatCount="indefinite" /></circle>
+    <circle cx="1650" cy="680" r="1.1" fill="#FFFFFF"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="3.5s" repeatCount="indefinite" /></circle>
+  </g>
+
+  <!-- 放射狀漸層背景 -->
+  <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+    <stop offset="0%" stop-color="rgba(16, 16, 48, 0.3)" />
+    <stop offset="100%" stop-color="#0A0A1A" />
+  </radialGradient>
+  <circle cx="960" cy="540" r="380" fill="url(#centerGlow)" opacity="0.6">
+    <animate attributeName="opacity" values="0.5;0.7;0.5" dur="8s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- 標題 -->
+  <text x="960" y="120" font-family="Inter, sans-serif" font-size="42" font-weight="700" fill="#FFBB00" text-anchor="middle">
+    AI Audience 系統概覽
+    <animate attributeName="opacity" values="0.9;1;0.9" dur="3s" repeatCount="indefinite" />
+  </text>
+  <text x="960" y="160" font-family="Inter, sans-serif" font-size="24" font-weight="400" fill="#FF8A00" text-anchor="middle">
+    打造精準受眾分析的智能引擎
+  </text>
+
+  <!-- 中央AI Agent -->
+  <g id="aiAgent">
+    <!-- 外環 -->
+    <circle cx="960" cy="540" r="100" fill="none" stroke="#FFBB00" stroke-width="3">
+      <animate attributeName="r" values="100;103;100" dur="4s" repeatCount="indefinite" />
+      <animate attributeName="stroke-opacity" values="0.9;1;0.9" dur="4s" repeatCount="indefinite" />
+    </circle>
+    <!-- 中環 - 透明度變化 -->
+    <circle cx="960" cy="540" r="95" fill="rgba(255, 187, 0, 0.1)">
+      <animate attributeName="opacity" values="0.1;0.15;0.1" dur="4s" repeatCount="indefinite" />
+    </circle>
+    <!-- 外輪廓 - 低透明度 -->
+    <circle cx="960" cy="540" r="110" fill="none" stroke="#FFBB00" stroke-width="0.5" opacity="0.3" />
+    <!-- AI文字 -->
+    <text x="960" y="530" font-family="Inter, sans-serif" font-size="36" font-weight="700" fill="#FFBB00" text-anchor="middle">AI</text>
+    <!-- Agent文字 -->
+    <text x="960" y="580" font-family="Inter, sans-serif" font-size="36" font-weight="700" fill="#FFBB00" text-anchor="middle">Agent</text>
+  </g>
+
+  <!-- 階段1: 消費者資料庫 -->
+  <g id="stage1">
+    <!-- 主圓圈 -->
+    <circle cx="400" cy="270" r="80" fill="none" stroke="#FFBB00" stroke-width="2">
+      <animate attributeName="stroke-opacity" values="0.9;1;0.9" dur="5s" begin="0s" repeatCount="indefinite" />
+    </circle>
+    <!-- 內部填充 -->
+    <circle cx="400" cy="270" r="76" fill="rgba(255, 187, 0, 0.05)" />
+    <!-- 文字 -->
+    <text x="400" y="265" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#FFBB00" text-anchor="middle">階段1</text>
+    <text x="400" y="290" font-family="Inter, sans-serif" font-size="18" font-weight="400" fill="#FFBB00" text-anchor="middle">消費者資料庫</text>
+    
+    <!-- 說明框 -->
+    <rect x="240" y="380" width="320" height="110" rx="4" ry="4" fill="rgba(0, 0, 0, 0.5)" stroke="#FFBB00" stroke-width="1.5" stroke-dasharray="2">
+      <animate attributeName="stroke-opacity" values="0.8;1;0.8" dur="5s" begin="0s" repeatCount="indefinite" />
+    </rect>
+    <text x="260" y="410" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 初始化龐大消費者資料庫</text>
+    <text x="260" y="440" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 載入數百萬消費者輪廓</text>
+    <text x="260" y="470" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 建立消費者特性標籤</text>
+    <text x="260" y="500" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 啟動預測AI模型分析潛在需求</text>
+  </g>
+
+  <!-- 階段2: RAG知識庫建立 -->
+  <g id="stage2">
+    <!-- 主圓圈 -->
+    <circle cx="400" cy="800" r="80" fill="none" stroke="#FFBB00" stroke-width="2">
+      <animate attributeName="stroke-opacity" values="0.9;1;0.9" dur="5s" begin="1s" repeatCount="indefinite" />
+    </circle>
+    <!-- 內部填充 -->
+    <circle cx="400" cy="800" r="76" fill="rgba(255, 187, 0, 0.05)" />
+    <!-- 文字 -->
+    <text x="400" y="795" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#FFBB00" text-anchor="middle">階段2</text>
+    <text x="400" y="825" font-family="Inter, sans-serif" font-size="18" font-weight="400" fill="#FFBB00" text-anchor="middle">RAG知識庫建立</text>
+    
+    <!-- 說明框 -->
+    <rect x="240" y="900" width="320" height="110" rx="4" ry="4" fill="rgba(0, 0, 0, 0.5)" stroke="#FFBB00" stroke-width="1.5" stroke-dasharray="2">
+      <animate attributeName="stroke-opacity" values="0.8;1;0.8" dur="5s" begin="1s" repeatCount="indefinite" />
+    </rect>
+    <text x="260" y="930" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 初始化RAG (Retrieval-Augmented Generation) 架構</text>
+    <text x="260" y="960" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 整合產業白皮書和專案資料</text>
+    <text x="260" y="990" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 建立知識索引和關聯性網絡</text>
+    <text x="260" y="1020" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 優化知識結構確保快速檢索能力</text>
+  </g>
+
+  <!-- 階段3: 數據融合 -->
+  <g id="stage3">
+    <!-- 主圓圈 -->
+    <circle cx="960" cy="900" r="80" fill="none" stroke="#00BCD4" stroke-width="2">
+      <animate attributeName="stroke-opacity" values="0.9;1;0.9" dur="5s" begin="2s" repeatCount="indefinite" />
+    </circle>
+    <!-- 內部填充 -->
+    <circle cx="960" cy="900" r="76" fill="rgba(0, 188, 212, 0.05)" />
+    <!-- 文字 -->
+    <text x="960" y="895" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#00BCD4" text-anchor="middle">階段3</text>
+    <text x="960" y="925" font-family="Inter, sans-serif" font-size="18" font-weight="400" fill="#00BCD4" text-anchor="middle">數據融合</text>
+    
+    <!-- 說明框 -->
+    <rect x="800" y="760" width="320" height="110" rx="4" ry="4" fill="rgba(0, 0, 0, 0.5)" stroke="#00BCD4" stroke-width="1.5" stroke-dasharray="2">
+      <animate attributeName="stroke-opacity" values="0.8;1;0.8" dur="5s" begin="2s" repeatCount="indefinite" />
+    </rect>
+    <text x="820" y="790" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 啟動TNL MG Tag系統</text>
+    <text x="820" y="820" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 連接客戶第一方數據</text>
+    <text x="820" y="850" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 資料清洗與標準化</text>
+    <text x="820" y="880" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 完成內外部數據的整合</text>
+  </g>
+
+  <!-- 階段4: 精準受眾匹配 -->
+  <g id="stage4">
+    <!-- 主圓圈 -->
+    <circle cx="1520" cy="800" r="80" fill="none" stroke="#FF5722" stroke-width="2">
+      <animate attributeName="stroke-opacity" values="0.9;1;0.9" dur="5s" begin="3s" repeatCount="indefinite" />
+    </circle>
+    <!-- 內部填充 -->
+    <circle cx="1520" cy="800" r="76" fill="rgba(255, 87, 34, 0.05)" />
+    <!-- 文字 -->
+    <text x="1520" y="795" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#FF5722" text-anchor="middle">階段4</text>
+    <text x="1520" y="825" font-family="Inter, sans-serif" font-size="18" font-weight="400" fill="#FF5722" text-anchor="middle">精準受眾匹配</text>
+    
+    <!-- 說明框 -->
+    <rect x="1360" y="900" width="320" height="110" rx="4" ry="4" fill="rgba(0, 0, 0, 0.5)" stroke="#FF5722" stroke-width="1.5" stroke-dasharray="2">
+      <animate attributeName="stroke-opacity" values="0.8;1;0.8" dur="5s" begin="3s" repeatCount="indefinite" />
+    </rect>
+    <text x="1380" y="930" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 分析客戶產品特性和需求</text>
+    <text x="1380" y="960" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 依據匹配結果進行受眾細分</text>
+    <text x="1380" y="990" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 優化匹配結果確保精準度</text>
+  </g>
+
+  <!-- 階段5: 受眾分析報告 -->
+  <g id="stage5">
+    <!-- 主圓圈 -->
+    <circle cx="1520" cy="270" r="80" fill="none" stroke="#FFBB00" stroke-width="2">
+      <animate attributeName="stroke-opacity" values="0.9;1;0.9" dur="5s" begin="4s" repeatCount="indefinite" />
+    </circle>
+    <!-- 內部填充 -->
+    <circle cx="1520" cy="270" r="76" fill="rgba(255, 187, 0, 0.05)" />
+    <!-- 文字 -->
+    <text x="1520" y="265" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#FFBB00" text-anchor="middle">階段5</text>
+    <text x="1520" y="290" font-family="Inter, sans-serif" font-size="18" font-weight="400" fill="#FFBB00" text-anchor="middle">受眾分析報告</text>
+    
+    <!-- 說明框 -->
+    <rect x="1360" y="380" width="320" height="110" rx="4" ry="4" fill="rgba(0, 0, 0, 0.5)" stroke="#FFBB00" stroke-width="1.5" stroke-dasharray="2">
+      <animate attributeName="stroke-opacity" values="0.8;1;0.8" dur="5s" begin="4s" repeatCount="indefinite" />
+    </rect>
+    <text x="1380" y="410" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 建立分析報告基本架構</text>
+    <text x="1380" y="440" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 進行人口統計分析</text>
+    <text x="1380" y="470" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 分析消費行為和偏好</text>
+    <text x="1380" y="500" font-family="Inter, sans-serif" font-size="14" fill="#FFFFFF">• 生成完整的受眾分析報告</text>
+  </g>
+
+  <!-- 連接線和粒子 - 階段1到AI Agent -->
+  <g id="connection1">
+    <!-- 虛線路徑 -->
+    <path d="M 450 320 Q 700 430, 880 500" fill="none" stroke="#FFBB00" stroke-width="2" stroke-dasharray="5,5">
+      <animate attributeName="stroke-dashoffset" values="0;-20" dur="2s" repeatCount="indefinite" />
+    </path>
+    <!-- 粒子動畫 -->
+    <circle cx="0" cy="0" r="3" fill="#FFBB00" opacity="0.8">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 450 320 Q 700 430, 880 500" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#FFBB00" opacity="0.6">
+      <animateMotion dur="3s" begin="0.5s" repeatCount="indefinite" path="M 450 320 Q 700 430, 880 500" />
+    </circle>
+    <circle cx="0" cy="0" r="2.5" fill="#FFBB00" opacity="0.7">
+      <animateMotion dur="3s" begin="1s" repeatCount="indefinite" path="M 450 320 Q 700 430, 880 500" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#FFBB00" opacity="0.5">
+      <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite" path="M 450 320 Q 700 430, 880 500" />
+    </circle>
+  </g>
+
+  <!-- 連接線和粒子 - 階段2到AI Agent -->
+  <g id="connection2">
+    <!-- 虛線路徑 -->
+    <path d="M 450 750 Q 700 650, 880 580" fill="none" stroke="#FFBB00" stroke-width="2" stroke-dasharray="5,5">
+      <animate attributeName="stroke-dashoffset" values="0;-20" dur="2s" repeatCount="indefinite" />
+    </path>
+    <!-- 粒子動畫 -->
+    <circle cx="0" cy="0" r="3" fill="#FFBB00" opacity="0.8">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 450 750 Q 700 650, 880 580" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#FFBB00" opacity="0.6">
+      <animateMotion dur="3s" begin="0.5s" repeatCount="indefinite" path="M 450 750 Q 700 650, 880 580" />
+    </circle>
+    <circle cx="0" cy="0" r="2.5" fill="#FFBB00" opacity="0.7">
+      <animateMotion dur="3s" begin="1s" repeatCount="indefinite" path="M 450 750 Q 700 650, 880 580" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#FFBB00" opacity="0.5">
+      <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite" path="M 450 750 Q 700 650, 880 580" />
+    </circle>
+  </g>
+
+  <!-- 連接線和粒子 - 階段3到AI Agent -->
+  <g id="connection3">
+    <!-- 虛線路徑 -->
+    <path d="M 960 820 L 960 640" fill="none" stroke="#00BCD4" stroke-width="2" stroke-dasharray="5,5">
+      <animate attributeName="stroke-dashoffset" values="0;-20" dur="2s" repeatCount="indefinite" />
+    </path>
+    <!-- 粒子動畫 -->
+    <circle cx="0" cy="0" r="3" fill="#00BCD4" opacity="0.8">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 960 820 L 960 640" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#00BCD4" opacity="0.6">
+      <animateMotion dur="3s" begin="0.5s" repeatCount="indefinite" path="M 960 820 L 960 640" />
+    </circle>
+    <circle cx="0" cy="0" r="2.5" fill="#00BCD4" opacity="0.7">
+      <animateMotion dur="3s" begin="1s" repeatCount="indefinite" path="M 960 820 L 960 640" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#00BCD4" opacity="0.5">
+      <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite" path="M 960 820 L 960 640" />
+    </circle>
+  </g>
+
+  <!-- 連接線和粒子 - 階段4到AI Agent -->
+  <g id="connection4">
+    <!-- 虛線路徑 -->
+    <path d="M 1470 750 Q 1220 650, 1040 580" fill="none" stroke="#FF5722" stroke-width="2" stroke-dasharray="5,5">
+      <animate attributeName="stroke-dashoffset" values="0;-20" dur="2s" repeatCount="indefinite" />
+    </path>
+    <!-- 粒子動畫 -->
+    <circle cx="0" cy="0" r="3" fill="#FF5722" opacity="0.8">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 1470 750 Q 1220 650, 1040 580" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#FF5722" opacity="0.6">
+      <animateMotion dur="3s" begin="0.5s" repeatCount="indefinite" path="M 1470 750 Q 1220 650, 1040 580" />
+    </circle>
+    <circle cx="0" cy="0" r="2.5" fill="#FF5722" opacity="0.7">
+      <animateMotion dur="3s" begin="1s" repeatCount="indefinite" path="M 1470 750 Q 1220 650, 1040 580" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#FF5722" opacity="0.5">
+      <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite" path="M 1470 750 Q 1220 650, 1040 580" />
+    </circle>
+  </g>
+
+  <!-- 連接線和粒子 - 階段5到AI Agent -->
+  <g id="connection5">
+    <!-- 虛線路徑 -->
+    <path d="M 1470 320 Q 1220 430, 1040 500" fill="none" stroke="#FFBB00" stroke-width="2" stroke-dasharray="5,5">
+      <animate attributeName="stroke-dashoffset" values="0;-20" dur="2s" repeatCount="indefinite" />
+    </path>
+    <!-- 粒子動畫 -->
+    <circle cx="0" cy="0" r="3" fill="#FFBB00" opacity="0.8">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 1470 320 Q 1220 430, 1040 500" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#FFBB00" opacity="0.6">
+      <animateMotion dur="3s" begin="0.5s" repeatCount="indefinite" path="M 1470 320 Q 1220 430, 1040 500" />
+    </circle>
+    <circle cx="0" cy="0" r="2.5" fill="#FFBB00" opacity="0.7">
+      <animateMotion dur="3s" begin="1s" repeatCount="indefinite" path="M 1470 320 Q 1220 430, 1040 500" />
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="#FFBB00" opacity="0.5">
+      <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite" path="M 1470 320 Q 1220 430, 1040 500" />
+    </circle>
+  </g>
+
+  <!-- AI Agent輪廓光暈 -->
+  <circle cx="960" cy="540" r="120" fill="none" stroke-width="1" stroke="#FFBB00" opacity="0.5">
+    <animate attributeName="r" values="120;125;120" dur="6s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.4;0.6;0.4" dur="6s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="960" cy="540" r="110" fill="none" stroke-width="0.5" stroke="#FFBB00" opacity="0.3">
+    <animate attributeName="r" values="110;115;110" dur="7s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.2;0.4;0.2" dur="7s" repeatCount="indefinite" />
+  </circle>
+</svg>
