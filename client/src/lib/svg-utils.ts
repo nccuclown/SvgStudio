@@ -71,8 +71,8 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
     // 獲取或生成元素ID
     let id = element.getAttribute('id') || '';
     if (!id) {
-      id = parentId ? 
-        `${parentId}-${type}-${counter++}` : 
+      id = parentId ?
+        `${parentId}-${type}-${counter++}` :
         `${type}-${counter++}`;
       element.setAttribute('id', id);
     }
@@ -155,7 +155,7 @@ export function findComponentById(components: SVGComponent[], id: string): SVGCo
 }
 
 /**
- * 更新SVG元素的屬性
+ * Updates a specific component's attribute in the SVG string
  */
 export function updateSvgComponent(
   svgString: string,
@@ -168,36 +168,61 @@ export function updateSvgComponent(
     const doc = parser.parseFromString(svgString, "image/svg+xml");
     const element = doc.getElementById(componentId);
 
-    if (!element) return svgString;
+    if (!element) {
+      console.warn(`Element with id "${componentId}" not found`);
+      return svgString;
+    }
 
-    // 檢查是否為樣式屬性
-    if (propertyName.startsWith('style-')) {
+    // 特殊屬性處理
+    if (propertyName === '_text') {
+      // 更新文本內容
+      element.textContent = propertyValue;
+    }
+    // 樣式屬性處理
+    else if (propertyName.startsWith('style-')) {
       const styleName = propertyName.replace('style-', '');
-      const currentStyles = element.getAttribute('style') || '';
-      const styles = new Map(
-        currentStyles.split(';')
-          .map(s => s.trim())
-          .filter(s => s)
-          .map(s => s.split(':').map(p => p.trim()) as [string, string])
-      );
+      const currentStyle = element.getAttribute('style') || '';
 
+      // 解析當前樣式
+      const styles = new Map();
+      currentStyle.split(';').forEach(pair => {
+        const [name, value] = pair.split(':').map(s => s.trim());
+        if (name && value) {
+          styles.set(name, value);
+        }
+      });
+
+      // 更新或添加新樣式
       styles.set(styleName, propertyValue);
+
+      // 重建樣式字符串
       const newStyle = Array.from(styles.entries())
         .map(([name, value]) => `${name}: ${value}`)
         .join('; ');
 
       element.setAttribute('style', newStyle);
-    } else if (propertyName === '_text') {
-      // 處理文本內容
-      element.textContent = propertyValue;
-    } else {
-      // 處理普通屬性
-      element.setAttribute(propertyName, propertyValue);
+    }
+    // 一般屬性處理
+    else {
+      if (propertyValue === '') {
+        element.removeAttribute(propertyName);
+      } else {
+        element.setAttribute(propertyName, propertyValue);
+      }
     }
 
     // 序列化並返回更新後的SVG
     const serializer = new XMLSerializer();
-    return serializer.serializeToString(doc);
+    const updatedSvg = serializer.serializeToString(doc);
+
+    // 驗證更新是否成功
+    const validation = new DOMParser().parseFromString(updatedSvg, "image/svg+xml");
+    if (validation.querySelector("parsererror")) {
+      console.error("Invalid SVG after update");
+      return svgString;
+    }
+
+    return updatedSvg;
   } catch (error) {
     console.error('更新SVG元素屬性時出錯:', error);
     return svgString;

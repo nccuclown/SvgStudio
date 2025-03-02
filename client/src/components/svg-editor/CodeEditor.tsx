@@ -1,9 +1,5 @@
-import { useEffect, useRef } from "react";
-import { EditorView, lineNumbers, keymap } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
-import { xml } from "@codemirror/lang-xml";
-import { basicSetup } from "codemirror";
-import { indentWithTab, defaultKeymap } from "@codemirror/commands";
+import { useRef } from "react";
+import Editor, { Monaco } from "@monaco-editor/react";
 
 interface CodeEditorProps {
   value: string;
@@ -16,119 +12,101 @@ export function CodeEditor({
   onChange,
   selectedComponent
 }: CodeEditorProps) {
-  const editorRef = useRef<EditorView>();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  const handleEditorDidMount = (editor: any, monaco: Monaco) => {
+    editorRef.current = editor;
 
-    // 自定義主題
-    const theme = EditorView.theme({
-      "&": {
-        height: "100%",
-        fontSize: "14px",
+    // 配置 XML 格式化選項
+    monaco.languages.registerDocumentFormattingEditProvider('xml', {
+      provideDocumentFormattingEdits: (model) => {
+        const text = model.getValue();
+        const formatted = formatXML(text);
+        return [
+          {
+            range: model.getFullModelRange(),
+            text: formatted,
+          },
+        ];
       },
-      ".cm-content": {
-        fontFamily: "monospace",
-        backgroundColor: "#1e1e1e",
-        color: "#d4d4d4",
-        whiteSpace: "pre-wrap",
-        wordBreak: "break-word"
-      },
-      ".cm-gutters": {
-        backgroundColor: "#1e1e1e",
-        color: "#858585",
-        border: "none",
-        borderRight: "1px solid #404040"
-      },
-      ".cm-line": {
-        padding: "0 4px"
-      },
-      ".cm-selectionBackground": {
-        backgroundColor: "rgba(81, 92, 106, 0.4) !important"
-      },
-      ".cm-cursor": {
-        borderLeftColor: "#fff"
-      },
-      "&.cm-focused": {
-        outline: "none"
-      },
-      // XML 語法高亮
-      ".cm-tagName": { color: "#569cd6" },
-      ".cm-bracket": { color: "#808080" },
-      ".cm-attributeName": { color: "#9cdcfe" },
-      ".cm-attributeValue": { color: "#ce9178" },
-      ".cm-comment": { color: "#6a9955" },
-      ".cm-string": { color: "#ce9178" },
-      ".cm-number": { color: "#b5cea8" }
     });
 
-    const state = EditorState.create({
-      doc: value,
-      extensions: [
-        basicSetup,
-        xml(),
-        theme,
-        lineNumbers(),
-        keymap.of([...defaultKeymap, indentWithTab]),
-        EditorView.lineWrapping,
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            onChange(update.state.doc.toString());
-          }
-        }),
+    // 設置編輯器主題
+    monaco.editor.defineTheme('svgEditor', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'tag', foreground: '569cd6' },
+        { token: 'attribute.name', foreground: '9cdcfe' },
+        { token: 'attribute.value', foreground: 'ce9178' },
+        { token: 'comment', foreground: '6a9955' },
       ],
+      colors: {
+        'editor.background': '#1e1e1e',
+        'editor.foreground': '#d4d4d4',
+      }
     });
 
-    const view = new EditorView({
-      state,
-      parent: containerRef.current,
+    monaco.editor.setTheme('svgEditor');
+  };
+
+  // 格式化 XML 代碼的輔助函數
+  function formatXML(xml: string): string {
+    let formatted = '';
+    let indent = '';
+    const tab = '  '; // 2 spaces
+    xml.split(/>\s*</).forEach(node => {
+      if (node.match(/^\/\w/)) {
+        indent = indent.substring(tab.length);
+      }
+      formatted += indent + '<' + node + '>\r\n';
+      if (node.match(/^<?\w[^>]*[^\/]$/)) {
+        indent += tab;
+      }
     });
+    return formatted.substring(1, formatted.length - 3);
+  }
 
-    editorRef.current = view;
-
-    return () => {
-      view.destroy();
-    };
-  }, []);
-
-  // 更新編輯器內容
-  useEffect(() => {
-    if (editorRef.current && value !== editorRef.current.state.doc.toString()) {
-      editorRef.current.dispatch({
-        changes: {
-          from: 0,
-          to: editorRef.current.state.doc.length,
-          insert: value,
-        },
-      });
-    }
-  }, [value]);
-
-  // 滾動到選中的組件
-  useEffect(() => {
+  // 當選中組件改變時，高亮相關代碼
+  const highlightSelectedComponent = () => {
     if (!selectedComponent || !editorRef.current) return;
 
-    const doc = editorRef.current.state.doc.toString();
-    const componentPattern = new RegExp(`id="${selectedComponent}"[^>]*>`, "i");
-    const match = doc.match(componentPattern);
+    const model = editorRef.current.getModel();
+    const text = model.getValue();
+    const regexp = new RegExp(`id="${selectedComponent}"[^>]*>`, 'i');
+    const match = text.match(regexp);
 
     if (match) {
-      const pos = doc.indexOf(match[0]);
-      const line = editorRef.current.state.doc.lineAt(pos);
-      editorRef.current.dispatch({
-        effects: EditorView.scrollIntoView(line.from, {
-          y: 'center',
-          yMargin: 50
-        })
+      const pos = text.indexOf(match[0]);
+      const line = model.getPositionAt(pos).lineNumber;
+      editorRef.current.revealLineInCenter(line);
+
+      // 設置光標位置
+      editorRef.current.setPosition({
+        lineNumber: line,
+        column: 1
       });
     }
-  }, [selectedComponent]);
+  };
 
   return (
-    <div 
-      ref={containerRef} 
-      className="h-full w-full overflow-hidden"
+    <Editor
+      height="100%"
+      defaultLanguage="xml"
+      value={value}
+      onChange={(value) => onChange(value || '')}
+      onMount={handleEditorDidMount}
+      options={{
+        minimap: { enabled: false },
+        fontSize: 14,
+        lineNumbers: 'on',
+        roundedSelection: false,
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        wordWrap: 'on',
+        formatOnPaste: true,
+        formatOnType: true,
+      }}
     />
   );
 }
