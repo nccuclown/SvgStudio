@@ -44,10 +44,8 @@ export function PropertyPanel({
   component,
   onPropertyChange
 }: PropertyPanelProps) {
-  // 重要修正：始終定義所有hooks，不管組件是否存在
   const [lastUpdateStatus, setLastUpdateStatus] = useState<'success' | 'error' | null>(null);
 
-  // 創建一個空的屬性組，確保useMemo總是運行
   const emptyGroups = {
     basic: [],
     style: [],
@@ -56,7 +54,6 @@ export function PropertyPanel({
     other: []
   };
 
-  // useMemo總是運行，不受component是否存在影響
   const propertyGroups = useMemo(() => {
     if (!component) return emptyGroups;
 
@@ -69,7 +66,6 @@ export function PropertyPanel({
       other: [] as [string, string][]
     };
 
-    // 分類所有屬性
     Object.entries(attributes).forEach(([key, value]) => {
       if (BASIC_PROPS.includes(key)) {
         groups.basic.push([key, value]);
@@ -79,18 +75,16 @@ export function PropertyPanel({
         groups.text.push([key, value]);
       } else if (ANIMATION_PROPS.includes(key)) {
         groups.animation.push([key, value]);
-      } else if (key !== 'id') { // 排除 id 屬性
+      } else if (key !== 'id') {
         groups.other.push([key, value]);
       }
     });
 
     return groups;
-  }, [component]);  // 只依賴component，確保一致性
+  }, [component]);
 
-  // 計算完整路徑
   const fullPath = component ? buildElementPath(component) : '未選擇元件';
 
-  // 如果沒有選中任何組件，顯示提示
   if (!component) {
     return (
       <div className="p-4 text-center text-muted-foreground">
@@ -99,7 +93,6 @@ export function PropertyPanel({
     );
   }
 
-  // 渲染特定類型的屬性編輯器
   const renderPropertyEditor = (property: string, value: string) => {
     const handleChange = (newValue: string) => {
       console.log(`[PropertyPanel] 屬性變更:`, {
@@ -110,9 +103,7 @@ export function PropertyPanel({
       });
 
       try {
-        // 處理空值或0的情況
         const actualValue = newValue === '' ? '0' : newValue;
-        // 如果是樣式屬性，需要添加 style- 前綴
         const actualProperty = property.startsWith('style-') ? property : property;
         onPropertyChange(component.id, actualProperty, actualValue);
         setLastUpdateStatus('success');
@@ -152,7 +143,7 @@ export function PropertyPanel({
       );
     }
 
-    // 數值屬性使用數字輸入框
+    // 數值屬性使用文本輸入框，外部添加上下調整按鈕
     else if (
       ['width', 'height', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'opacity', 'stroke-width']
         .includes(property) || property.match(/^style-(opacity|stroke-width)$/)
@@ -160,11 +151,7 @@ export function PropertyPanel({
       return (
         <div className="flex gap-2 items-center">
           <Input
-            type="number"
             value={value}
-            step={property.includes('opacity') ? 0.1 : 1}
-            min={property.includes('opacity') ? 0 : undefined}
-            max={property.includes('opacity') ? 1 : undefined}
             onChange={(e) => handleChange(e.target.value)}
             className="flex-1"
           />
@@ -210,7 +197,6 @@ export function PropertyPanel({
     }
   };
 
-  // 渲染屬性組
   const renderPropertyGroup = (properties: [string, string][]) => {
     if (properties.length === 0) {
       return (
@@ -232,7 +218,6 @@ export function PropertyPanel({
     );
   };
 
-  // 準備要顯示的標籤
   const visibleTabs = [
     { id: 'basic', label: '基本', content: propertyGroups.basic },
     { id: 'style', label: '樣式', content: propertyGroups.style },
@@ -247,7 +232,6 @@ export function PropertyPanel({
         <h3 className="text-sm font-medium">
           {component?.type} <span className="text-muted-foreground">({component?.id})</span>
         </h3>
-        {/* 添加元素路徑顯示 */}
         <div className="text-xs text-muted-foreground mt-1 bg-muted p-1 rounded">
           <span className="font-mono">完整路徑: {fullPath}</span>
         </div>
