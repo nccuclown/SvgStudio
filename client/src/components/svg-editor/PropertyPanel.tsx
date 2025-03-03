@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SVGComponent } from "@/lib/svg-utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PropertyPanelProps {
   component: SVGComponent | null;
@@ -157,14 +158,44 @@ export function PropertyPanel({
         .includes(property) || property.match(/^style-(opacity|stroke-width)$/)
     ) {
       return (
-        <Input
-          type="number"
-          value={value}
-          step={property.includes('opacity') ? 0.1 : 1}
-          min={property.includes('opacity') ? 0 : undefined}
-          max={property.includes('opacity') ? 1 : undefined}
-          onChange={(e) => handleChange(e.target.value)}
-        />
+        <div className="flex gap-2 items-center">
+          <Input
+            type="number"
+            value={value}
+            step={property.includes('opacity') ? 0.1 : 1}
+            min={property.includes('opacity') ? 0 : undefined}
+            max={property.includes('opacity') ? 1 : undefined}
+            onChange={(e) => handleChange(e.target.value)}
+            className="flex-1"
+          />
+          <div className="flex flex-col">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-5 px-2 rounded-b-none hover:bg-accent"
+              onClick={() => {
+                const step = property.includes('opacity') ? 0.1 : 1;
+                const newValue = parseFloat(value) + step;
+                if (property.includes('opacity') && newValue > 1) return;
+                handleChange(newValue.toString());
+              }}
+            >
+              ▲
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-5 px-2 rounded-t-none border-t-0 hover:bg-accent"
+              onClick={() => {
+                const step = property.includes('opacity') ? 0.1 : 1;
+                const newValue = Math.max(parseFloat(value) - step, 0);
+                handleChange(newValue.toString());
+              }}
+            >
+              ▼
+            </Button>
+          </div>
+        </div>
       );
     }
 
@@ -214,7 +245,7 @@ export function PropertyPanel({
     <div className="p-4 h-full">
       <div className="mb-4">
         <h3 className="text-sm font-medium">
-          {component.type} <span className="text-muted-foreground">({component.id})</span>
+          {component?.type} <span className="text-muted-foreground">({component?.id})</span>
         </h3>
         {/* 添加元素路徑顯示 */}
         <div className="text-xs text-muted-foreground mt-1 bg-muted p-1 rounded">
