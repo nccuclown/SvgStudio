@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 interface FileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onFileSelect: (content: string) => void;
+  onFileSelect: (content: string, id: number) => void;
 }
 
 interface FileListItemProps {
@@ -62,9 +62,12 @@ export function FileDialog({ open, onOpenChange, onFileSelect }: FileDialogProps
       if (!response.ok) throw new Error('Failed to create file');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/svg/list'] });
       setNewFileName("");
+      // 在建立後自動選擇新檔案
+      onFileSelect(data.content, data.id);
+      onOpenChange(false);
       toast({
         title: "成功",
         description: "檔案已建立",
@@ -85,7 +88,7 @@ export function FileDialog({ open, onOpenChange, onFileSelect }: FileDialogProps
       const response = await fetch(`/api/svg/${id}`);
       if (!response.ok) throw new Error('Failed to load file');
       const data = await response.json();
-      onFileSelect(data.content);
+      onFileSelect(data.content, data.id);
       onOpenChange(false);
     } catch (error) {
       toast({

@@ -53,7 +53,7 @@ export default function Editor() {
   } = useSvgEditor();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isFileDialogOpen, setIsFileDialogOpen] = useState(false); // Initialize as false
+  const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
 
   // 獲取選中的組件
   const selectedComponents = selectedComponentIds
@@ -66,8 +66,9 @@ export default function Editor() {
     setIsFullscreen(!isFullscreen);
   };
 
-  const handleFileSelect = (content: string) => {
+  const handleFileSelect = (content: string, id: number) => {
     setOriginalSvgCode(content);
+    setCurrentDocumentId(id);
   };
 
   return (
