@@ -23,7 +23,26 @@ const TEXT_PROPS = ['_text', 'text-anchor', 'font-family', 'font-size', 'font-we
 const ANIMATION_PROPS = ['dur', 'repeatCount', 'values', 'attributeName', 'begin', 'from', 'to', 'keyTimes', 'keySplines'];
 
 // 可以批量調整的屬性
-const NUMERIC_PROPS = ['width', 'height', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'stroke-width', 'opacity'];
+const NUMERIC_PROPS = [
+  // 基本屬性
+  'width', 'height', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2',
+  // 樣式屬性
+  'stroke-width', 'opacity', 'fill-opacity', 'stroke-opacity', 'stroke-dasharray',
+  // 文字屬性
+  'font-size', 'letter-spacing', 'word-spacing', 'line-height'
+];
+
+// 特殊步進值的屬性
+const STEP_VALUES: Record<string, number> = {
+  'opacity': 0.1,
+  'fill-opacity': 0.1,
+  'stroke-opacity': 0.1,
+  'font-size': 2,
+  'stroke-width': 0.5,
+  'letter-spacing': 0.5,
+  'word-spacing': 0.5,
+  'line-height': 0.1,
+};
 
 function buildElementPath(component: SVGComponent): string {
   if (!component) return '';
@@ -95,58 +114,38 @@ export function PropertyPanel({
   }
 
   const renderPropertyEditor = (property: string, value: string | null) => {
-    // 如果是數值類型的屬性，顯示批量調整按鈕
-    if (NUMERIC_PROPS.includes(property)) {
-      const step = property.includes('opacity') ? 0.1 : 1;
+    // 數值調整控制項
+    const renderNumericControls = (property: string) => {
+      const step = STEP_VALUES[property] || 1;
       return (
-        <div className="flex gap-2 items-center">
-          <div className="flex-1">
-            {value === null ? (
-              <div className="text-sm text-muted-foreground italic">
-                多個不同的值
-              </div>
-            ) : (
-              <Input
-                value={value}
-                onChange={(e) => {
-                  if (components.length === 1) {
-                    onPropertyChange(components[0].id, property, e.target.value);
-                  }
-                }}
-                readOnly={components.length > 1}
-                className="flex-1"
-              />
-            )}
-          </div>
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onBatchUpdate(property, 'decrease', step)}
-              className="px-2 hover:bg-accent"
-            >
-              -
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onBatchUpdate(property, 'increase', step)}
-              className="px-2 hover:bg-accent"
-            >
-              +
-            </Button>
-          </div>
+        <div className="flex gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onBatchUpdate(property, 'decrease', step)}
+            className="px-2 hover:bg-accent"
+          >
+            -
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onBatchUpdate(property, 'increase', step)}
+            className="px-2 hover:bg-accent"
+          >
+            +
+          </Button>
         </div>
       );
-    }
+    };
 
-    // 顏色屬性
+    // 如果是顏色屬性
     if (property === 'fill' || property === 'stroke' || property === 'style-fill' || property === 'style-stroke') {
       return (
         <div className="flex gap-2">
           <Input
             type="color"
-            value={value || ''}
+            value={value || '#000000'}
             className="w-12"
             onChange={(e) => {
               if (components.length === 1) {
@@ -165,6 +164,33 @@ export function PropertyPanel({
             readOnly={components.length > 1}
             className="flex-1"
           />
+        </div>
+      );
+    }
+
+    // 如果是可以數值調整的屬性
+    if (NUMERIC_PROPS.includes(property)) {
+      return (
+        <div className="flex gap-2 items-center">
+          <div className="flex-1">
+            {value === null ? (
+              <div className="text-sm text-muted-foreground italic">
+                多個不同的值
+              </div>
+            ) : (
+              <Input
+                value={value}
+                onChange={(e) => {
+                  if (components.length === 1) {
+                    onPropertyChange(components[0].id, property, e.target.value || '0');
+                  }
+                }}
+                readOnly={components.length > 1}
+                className="flex-1"
+              />
+            )}
+          </div>
+          {renderNumericControls(property)}
         </div>
       );
     }
