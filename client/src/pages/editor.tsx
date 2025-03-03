@@ -4,6 +4,7 @@ import { ComponentTree } from "@/components/svg-editor/ComponentTree";
 import { Preview } from "@/components/svg-editor/Preview";
 import { PropertyPanel } from "@/components/svg-editor/PropertyPanel";
 import { CodeEditor } from "@/components/svg-editor/CodeEditor";
+import { FileDialog } from "@/components/svg-editor/FileDialog";
 import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
@@ -11,7 +12,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
+import {
   Grid,
   Image,
   Code,
@@ -20,7 +21,9 @@ import {
   Copy,
   Clipboard,
   ArrowUpCircle,
-  ArrowDownCircle
+  ArrowDownCircle,
+  Save,
+  FileJson
 } from "lucide-react";
 import { findComponentById } from "@/lib/svg-utils";
 
@@ -43,10 +46,14 @@ export default function Editor() {
     copyComponent,
     pasteComponent,
     moveComponentLayer,
-    hasCopiedElement
+    hasCopiedElement,
+    currentDocumentId,
+    setCurrentDocumentId,
+    saveDocument
   } = useSvgEditor();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFileDialogOpen, setIsFileDialogOpen] = useState(false); // Initialize as false
 
   // 獲取選中的組件
   const selectedComponents = selectedComponentIds
@@ -59,12 +66,35 @@ export default function Editor() {
     setIsFullscreen(!isFullscreen);
   };
 
+  const handleFileSelect = (content: string) => {
+    setOriginalSvgCode(content);
+  };
+
   return (
     <div className="h-screen w-full flex flex-col">
       {/* 頂部工具欄 */}
       <div className="border-b p-2 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="font-bold text-xl">SVG編輯器</span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsFileDialogOpen(true)}
+            className="hover:bg-accent"
+            title="檔案管理"
+          >
+            <FileJson className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={saveDocument}
+            disabled={!currentDocumentId}
+            className="hover:bg-accent"
+            title="儲存檔案"
+          >
+            <Save className="h-4 w-4" />
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           {/* 元素管理按鈕 */}
@@ -108,7 +138,6 @@ export default function Editor() {
           >
             <ArrowDownCircle className="h-4 w-4" />
           </Button>
-          {/* 原有的按鈕 */}
           <Button variant="outline" size="icon" onClick={toggleGrid}>
             <Grid className={`h-4 w-4 ${showGrid ? "text-primary" : ""}`} />
           </Button>
@@ -121,6 +150,13 @@ export default function Editor() {
           </Button>
         </div>
       </div>
+
+      {/* 檔案管理對話框 */}
+      <FileDialog
+        open={isFileDialogOpen}
+        onOpenChange={setIsFileDialogOpen}
+        onFileSelect={handleFileSelect}
+      />
 
       {/* 主要內容區域 */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">

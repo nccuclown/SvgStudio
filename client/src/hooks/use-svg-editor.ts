@@ -7,6 +7,7 @@ import {
   SVGComponent,
   FlatComponent
 } from "@/lib/svg-utils";
+import { useToast } from "@/hooks/use-toast";
 
 // 默認 SVG 範例
 const DEFAULT_SVG = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -33,6 +34,8 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
   const [showGrid, setShowGrid] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [copiedElement, setCopiedElement] = useState<CopiedElement | null>(null);
+  const [currentDocumentId, setCurrentDocumentId] = useState<number | null>(null);
+  const { toast } = useToast();
 
   const svgDomRef = useRef<Document | null>(null);
 
@@ -45,29 +48,58 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
 
     setSelectedComponentIds(prev => {
       if (isMultiSelect) {
-        // 如果已選中則移除，否則添加
         return prev.includes(id) 
           ? prev.filter(existingId => existingId !== id)
           : [...prev, id];
       }
-      // 單選模式
       return [id];
     });
   }, []);
 
-  // 懸停組件
+  // 儲存當前文件
+  const saveDocument = useCallback(async () => {
+    if (!currentDocumentId) {
+      toast({
+        title: "錯誤",
+        description: "請先選擇或建立一個檔案",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/svg/${currentDocumentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: processedSvgCode })
+      });
+
+      if (!response.ok) throw new Error('儲存失敗');
+
+      toast({
+        title: "成功",
+        description: "檔案已儲存",
+      });
+    } catch (error) {
+      toast({
+        title: "錯誤",
+        description: "儲存檔案失敗",
+        variant: "destructive",
+      });
+    }
+  }, [currentDocumentId, processedSvgCode, toast]);
+
+  // 其他現有的功能保持不變...
   const hoverComponent = useCallback((id: string | null) => {
     setHoveredComponentId(id);
   }, []);
 
-  // 批量更新屬性
   const batchUpdateProperty = useCallback((property: string, operation: 'increase' | 'decrease', amount: number) => {
     if (selectedComponentIds.length === 0) return;
 
     try {
       let currentSvg = processedSvgCode;
 
-      // 為每個選中的元素更新屬性
       selectedComponentIds.forEach(id => {
         const component = findComponentById(fullComponents, id);
         if (!component) return;
@@ -80,7 +112,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
         currentSvg = updateSvgComponent(currentSvg, id, property, newValue.toString());
       });
 
-      // 更新狀態
       if (currentSvg !== processedSvgCode) {
         setProcessedSvgCode(currentSvg);
         const components = parseSvgComponents(currentSvg);
@@ -92,7 +123,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     }
   }, [selectedComponentIds, processedSvgCode, fullComponents]);
 
-  // 獲取選中元素的共同屬性
   const getCommonProperties = useCallback(() => {
     if (selectedComponentIds.length === 0) return null;
 
@@ -102,15 +132,13 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
 
     if (components.length === 0) return null;
 
-    // 獲取第一個組件的所有屬性
     const firstComponent = components[0];
     const commonProps: Record<string, string | null> = { ...firstComponent.attributes };
 
-    // 與其他組件比較，保留共同的屬性
     components.slice(1).forEach(component => {
       Object.keys(commonProps).forEach(key => {
         if (component.attributes[key] !== commonProps[key]) {
-          commonProps[key] = null; // 使用 null 表示該屬性值不一致
+          commonProps[key] = null; 
         }
       });
     });
@@ -118,7 +146,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     return commonProps;
   }, [selectedComponentIds, fullComponents]);
 
-  // 複製選中的組件
   const copyComponent = useCallback(() => {
     if (selectedComponentIds.length === 0) return;
 
@@ -135,12 +162,11 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
       .filter((el): el is CopiedElement => el !== null);
 
     if (elementsToCopy.length > 0) {
-      setCopiedElement(elementsToCopy[0]); // 暫時只支持複製第一個元素
+      setCopiedElement(elementsToCopy[0]); 
       console.log('已複製元素:', elementsToCopy[0]);
     }
   }, [selectedComponentIds, fullComponents]);
 
-  // 其他方法保持不變...
   const pasteComponent = useCallback(() => {
     if (!copiedElement) return;
 
@@ -149,15 +175,12 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
       const doc = parser.parseFromString(processedSvgCode, 'image/svg+xml');
       const svgRoot = doc.documentElement;
 
-      // 創建新元素
       const newElement = doc.createElementNS('http://www.w3.org/2000/svg', copiedElement.type);
 
-      // 設置屬性
       Object.entries(copiedElement.attributes).forEach(([key, value]) => {
         newElement.setAttribute(key, value);
       });
 
-      // 稍微偏移位置，避免完全重疊
       if (copiedElement.attributes.x) {
         newElement.setAttribute('x', String(parseFloat(copiedElement.attributes.x) + 20));
       }
@@ -171,15 +194,12 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
         newElement.setAttribute('cy', String(parseFloat(copiedElement.attributes.cy) + 20));
       }
 
-      // 添加到SVG中
       svgRoot.appendChild(newElement);
 
-      // 更新代碼
       const serializer = new XMLSerializer();
       const updatedSvg = serializer.serializeToString(doc);
       setProcessedSvgCode(updatedSvg);
 
-      // 重新解析組件
       const components = parseSvgComponents(updatedSvg);
       setFullComponents(components);
       setFlatComponents(flattenSvgComponents(components));
@@ -189,7 +209,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     }
   }, [copiedElement, processedSvgCode]);
 
-  // 更新組件層級
   const moveComponentLayer = useCallback((direction: 'up' | 'down') => {
     if (selectedComponentIds.length === 0) return;
 
@@ -214,7 +233,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
       const updatedSvg = serializer.serializeToString(doc);
       setProcessedSvgCode(updatedSvg);
 
-      // 重新解析組件
       const components = parseSvgComponents(updatedSvg);
       setFullComponents(components);
       setFlatComponents(flattenSvgComponents(components));
@@ -224,12 +242,10 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     }
   }, [selectedComponentIds, processedSvgCode]);
 
-  // 切換網格顯示
   const toggleGrid = useCallback(() => {
     setShowGrid(prev => !prev);
   }, []);
 
-  // 更新組件屬性
   const updateComponentProperty = useCallback((id: string, property: string, value: string) => {
     try {
       const updatedSvg = updateSvgComponent(processedSvgCode, id, property, value);
@@ -244,7 +260,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     }
   }, [processedSvgCode]);
 
-  // 解析 SVG 代碼
   useEffect(() => {
     try {
       const parser = new DOMParser();
@@ -294,6 +309,9 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     copyComponent,
     pasteComponent,
     moveComponentLayer,
-    hasCopiedElement: !!copiedElement
+    hasCopiedElement: !!copiedElement,
+    currentDocumentId,
+    setCurrentDocumentId,
+    saveDocument
   };
 }
