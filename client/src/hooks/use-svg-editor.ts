@@ -55,16 +55,20 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
 
       // 解析 SVG 組件（這個過程會生成帶有ID的新SVG）
       const components = parseSvgComponents(originalSvgCode);
-      setFullComponents(components);
-
-      // 扁平化組件結構
-      const flattened = flattenSvgComponents(components);
-      setFlatComponents(flattened);
 
       // 獲取處理後的SVG代碼
       const processedDoc = parser.parseFromString(originalSvgCode, "image/svg+xml");
       const serializer = new XMLSerializer();
-      setProcessedSvgCode(serializer.serializeToString(processedDoc));
+      const processed = serializer.serializeToString(processedDoc);
+      setProcessedSvgCode(processed);
+
+      // 使用處理後的代碼重新解析組件
+      const processedComponents = parseSvgComponents(processed);
+      setFullComponents(processedComponents);
+
+      // 扁平化組件結構
+      const flattened = flattenSvgComponents(processedComponents);
+      setFlatComponents(flattened);
 
     } catch (error) {
       console.error("解析 SVG 時出錯:", error);
