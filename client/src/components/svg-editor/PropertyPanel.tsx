@@ -9,6 +9,38 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Path指令的說明
+const PATH_COMMANDS = {
+  M: "移動到 (x,y)",
+  m: "相對移動 (dx,dy)",
+  L: "畫線到 (x,y)",
+  l: "相對畫線 (dx,dy)",
+  H: "水平線到 x",
+  h: "相對水平線 dx",
+  V: "垂直線到 y",
+  v: "相對垂直線 dy",
+  C: "曲線到 (x,y) 控制點(x1,y1,x2,y2)",
+  c: "相對曲線 (dx,dy) 控制點(dx1,dy1,dx2,dy2)",
+  Q: "二次曲線到 (x,y) 控制點(x1,y1)",
+  q: "相對二次曲線 (dx,dy) 控制點(dx1,dy1)",
+  Z: "閉合路徑",
+  z: "閉合路徑"
+};
+
+// 解析path的d屬性
+function parsePath(d: string): { command: string, params: string, description: string }[] {
+  const commands = d.match(/[a-zA-Z][^a-zA-Z]*/g) || [];
+  return commands.map(cmd => {
+    const command = cmd[0];
+    const params = cmd.slice(1).trim();
+    return {
+      command,
+      params,
+      description: PATH_COMMANDS[command] || "未知指令"
+    };
+  });
+}
+
 interface PropertyPanelProps {
   components: SVGComponent[] | null;
   commonProperties: Record<string, string | null> | null;
@@ -195,8 +227,62 @@ export function PropertyPanel({
       );
     }
 
+    // 特殊處理path的d屬性
+    if (property === 'd') {
+      const pathCommands = value ? parsePath(value) : [];
+
+      return (
+        <div className="space-y-2">
+          <Textarea
+            value={value || ''}
+            rows={4}
+            onChange={(e) => {
+              if (components.length === 1) {
+                onPropertyChange(components[0].id, property, e.target.value);
+              }
+            }}
+            readOnly={components.length > 1}
+          />
+          <div className="text-sm space-y-1">
+            <div className="font-medium text-muted-foreground">路徑指令說明：</div>
+            {pathCommands.map((cmd, index) => (
+              <div key={index} className="flex items-start gap-2 text-xs">
+                <span className="font-mono bg-muted px-1 rounded">{cmd.command}</span>
+                <span className="font-mono text-muted-foreground">{cmd.params}</span>
+                <span className="text-muted-foreground">- {cmd.description}</span>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (components.length === 1) {
+                  onPropertyChange(components[0].id, property, "M 0 0 L 100 0 L 50 86.6 Z");
+                }
+              }}
+            >
+              插入三角形
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (components.length === 1) {
+                  onPropertyChange(components[0].id, property, "M 0 0 L 100 0 L 100 100 L 0 100 Z");
+                }
+              }}
+            >
+              插入矩形
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     // 路徑數據需要多行文本框
-    if (property === 'd' || property === 'points' || property === '_text') {
+    if (property === 'points' || property === '_text') {
       return (
         <Textarea
           value={value || ''}
@@ -258,7 +344,7 @@ export function PropertyPanel({
     <div className="p-4 h-full">
       <div className="mb-4">
         <h3 className="text-sm font-medium">
-          {components.length > 1 
+          {components.length > 1
             ? `已選擇 ${components.length} 個元件`
             : `${components[0].type} (${components[0].id})`
           }
