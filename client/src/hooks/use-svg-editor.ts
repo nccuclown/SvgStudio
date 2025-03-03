@@ -10,9 +10,9 @@ import {
 
 // 默認 SVG 範例
 const DEFAULT_SVG = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-  <rect id="rect1" x="10" y="10" width="80" height="80" fill="blue" />
-  <circle id="circle1" cx="150" cy="50" r="40" fill="red" />
-  <path id="path1" d="M10 150 L90 150 L50 90 Z" fill="green" />
+  <rect x="10" y="10" width="80" height="80" fill="blue" />
+  <circle cx="150" cy="50" r="40" fill="red" />
+  <path d="M10 150 L90 150 L50 90 Z" fill="green" />
 </svg>`;
 
 /**
@@ -102,12 +102,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     setHoveredComponentId(id);
   }, []);
 
-  // 獲取選中的組件詳情
-  const getSelectedComponent = useCallback(() => {
-    if (!selectedComponentId || !fullComponents.length) return null;
-    return findComponentById(fullComponents, selectedComponentId);
-  }, [selectedComponentId, fullComponents]);
-
   return {
     svgCode,
     setSvgCode,
@@ -120,7 +114,6 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     showGrid,
     toggleGrid,
     validationError,
-    updateComponentProperty,
-    getSelectedComponent
+    updateComponentProperty
   };
 }

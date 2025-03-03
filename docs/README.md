@@ -18,26 +18,28 @@
 - Tailwind CSS 樣式框架
 - shadcn/ui 組件庫
 
-## 快速入門
-1. 安裝依賴：
-```bash
-npm install
-```
+## 當前挑戰
+1. SVG元素識別
+   - 原始SVG檔案中的元素可能沒有ID
+   - 需要有效的元素定位策略
+   - 保持元素階層關係
 
-2. 啟動開發服務器：
-```bash
-npm run dev
-```
+2. 屬性修改
+   - 準確找到要修改的元素
+   - 處理特殊屬性（如style）
+   - 維護SVG結構完整性
 
-3. 打開瀏覽器訪問：
-```
-http://localhost:5000
-```
+3. 用戶體驗
+   - 提供更直觀的元素預覽
+   - 確保修改即時生效
+   - 完善錯誤處理機制
 
 ## 相關文檔
 - [架構文檔](./architecture.md)
 - [組件文檔](./components.md)
 - [自定義指南](./customization.md)
+- [SVG修改流程](./svg-modification-process.md)
+- [編輯器挑戰](./svg-editor-challenges.md)
 
 ## 注意事項
 - 本項目使用 Replit 進行開發和部署
