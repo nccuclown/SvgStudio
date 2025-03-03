@@ -31,13 +31,15 @@ export default function Editor() {
     processedSvgCode,
     components,
     fullComponents,
-    selectedComponentId,
+    selectedComponentIds,
     selectComponent,
     hoveredComponentId,
     hoverComponent,
     showGrid,
     toggleGrid,
     updateComponentProperty,
+    batchUpdateProperty,
+    getCommonProperties,
     copyComponent,
     pasteComponent,
     moveComponentLayer,
@@ -46,9 +48,12 @@ export default function Editor() {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const selectedComponent = selectedComponentId 
-    ? findComponentById(fullComponents, selectedComponentId)
-    : null;
+  // 獲取選中的組件
+  const selectedComponents = selectedComponentIds
+    .map(id => findComponentById(fullComponents, id))
+    .filter(component => component !== null);
+
+  const commonProperties = getCommonProperties();
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -67,7 +72,7 @@ export default function Editor() {
             variant="outline"
             size="icon"
             onClick={copyComponent}
-            disabled={!selectedComponentId}
+            disabled={selectedComponentIds.length === 0}
             className="hover:bg-accent"
             title="複製元素"
           >
@@ -87,7 +92,7 @@ export default function Editor() {
             variant="outline"
             size="icon"
             onClick={() => moveComponentLayer('up')}
-            disabled={!selectedComponentId}
+            disabled={selectedComponentIds.length === 0}
             className="hover:bg-accent"
             title="上移一層"
           >
@@ -97,7 +102,7 @@ export default function Editor() {
             variant="outline"
             size="icon"
             onClick={() => moveComponentLayer('down')}
-            disabled={!selectedComponentId}
+            disabled={selectedComponentIds.length === 0}
             className="hover:bg-accent"
             title="下移一層"
           >
@@ -124,7 +129,7 @@ export default function Editor() {
           <div className="h-full border-r">
             <ComponentTree
               components={components}
-              selectedComponent={selectedComponentId}
+              selectedComponentIds={selectedComponentIds}
               onSelectComponent={selectComponent}
               onHoverComponent={hoverComponent}
             />
@@ -157,7 +162,7 @@ export default function Editor() {
               <Preview
                 svgCode={processedSvgCode}
                 showGrid={showGrid}
-                selectedComponentId={selectedComponentId}
+                selectedComponentIds={selectedComponentIds}
                 hoveredComponentId={hoveredComponentId}
                 isFullscreen={isFullscreen}
               />
@@ -167,7 +172,7 @@ export default function Editor() {
               <CodeEditor
                 value={originalSvgCode}
                 onChange={setOriginalSvgCode}
-                selectedComponent={selectedComponentId}
+                selectedComponentIds={selectedComponentIds}
               />
             </TabsContent>
 
@@ -175,7 +180,7 @@ export default function Editor() {
               <CodeEditor
                 value={processedSvgCode}
                 readOnly={true}
-                selectedComponent={selectedComponentId}
+                selectedComponentIds={selectedComponentIds}
               />
             </TabsContent>
           </Tabs>
@@ -187,8 +192,10 @@ export default function Editor() {
         <ResizablePanel defaultSize={25} minSize={15}>
           <div className="h-full border-l">
             <PropertyPanel
-              component={selectedComponent}
+              components={selectedComponents}
+              commonProperties={commonProperties}
               onPropertyChange={updateComponentProperty}
+              onBatchUpdate={batchUpdateProperty}
             />
           </div>
         </ResizablePanel>

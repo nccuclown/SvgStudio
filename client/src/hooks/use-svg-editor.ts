@@ -24,12 +24,11 @@ interface CopiedElement {
  * SVG 編輯器自定義 Hook
  */
 export function useSvgEditor(initialSvg = DEFAULT_SVG) {
-  // 原始SVG代碼
   const [originalSvgCode, setOriginalSvgCode] = useState<string>(initialSvg);
   const [processedSvgCode, setProcessedSvgCode] = useState<string>('');
   const [flatComponents, setFlatComponents] = useState<FlatComponent[]>([]);
   const [fullComponents, setFullComponents] = useState<SVGComponent[]>([]);
-  const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
+  const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>([]);
   const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(null);
   const [showGrid, setShowGrid] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -37,10 +36,23 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
 
   const svgDomRef = useRef<Document | null>(null);
 
-  // 選擇組件
-  const selectComponent = useCallback((id: string | null) => {
-    console.log(`[selectComponent] 選中組件: ${id}`);
-    setSelectedComponentId(id);
+  // 選擇組件 - 支持多選
+  const selectComponent = useCallback((id: string | null, isMultiSelect: boolean = false) => {
+    if (!id) {
+      setSelectedComponentIds([]);
+      return;
+    }
+
+    setSelectedComponentIds(prev => {
+      if (isMultiSelect) {
+        // 如果已選中則移除，否則添加
+        return prev.includes(id) 
+          ? prev.filter(existingId => existingId !== id)
+          : [...prev, id];
+      }
+      // 單選模式
+      return [id];
+    });
   }, []);
 
   // 懸停組件
@@ -48,26 +60,87 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     setHoveredComponentId(id);
   }, []);
 
-  // 複製組件
+  // 批量更新屬性
+  const batchUpdateProperty = useCallback((property: string, operation: 'increase' | 'decrease', amount: number) => {
+    if (selectedComponentIds.length === 0) return;
+
+    try {
+      let currentSvg = processedSvgCode;
+
+      // 為每個選中的元素更新屬性
+      selectedComponentIds.forEach(id => {
+        const component = findComponentById(fullComponents, id);
+        if (!component) return;
+
+        const currentValue = parseFloat(component.attributes[property] || '0');
+        const newValue = operation === 'increase' 
+          ? currentValue + amount 
+          : Math.max(0, currentValue - amount);
+
+        currentSvg = updateSvgComponent(currentSvg, id, property, newValue.toString());
+      });
+
+      // 更新狀態
+      if (currentSvg !== processedSvgCode) {
+        setProcessedSvgCode(currentSvg);
+        const components = parseSvgComponents(currentSvg);
+        setFullComponents(components);
+        setFlatComponents(flattenSvgComponents(components));
+      }
+    } catch (error) {
+      console.error(`[batchUpdateProperty] 批量更新屬性時出錯:`, error);
+    }
+  }, [selectedComponentIds, processedSvgCode, fullComponents]);
+
+  // 獲取選中元素的共同屬性
+  const getCommonProperties = useCallback(() => {
+    if (selectedComponentIds.length === 0) return null;
+
+    const components = selectedComponentIds
+      .map(id => findComponentById(fullComponents, id))
+      .filter((component): component is SVGComponent => component !== null);
+
+    if (components.length === 0) return null;
+
+    // 獲取第一個組件的所有屬性
+    const firstComponent = components[0];
+    const commonProps: Record<string, string | null> = { ...firstComponent.attributes };
+
+    // 與其他組件比較，保留共同的屬性
+    components.slice(1).forEach(component => {
+      Object.keys(commonProps).forEach(key => {
+        if (component.attributes[key] !== commonProps[key]) {
+          commonProps[key] = null; // 使用 null 表示該屬性值不一致
+        }
+      });
+    });
+
+    return commonProps;
+  }, [selectedComponentIds, fullComponents]);
+
+  // 複製選中的組件
   const copyComponent = useCallback(() => {
-    if (!selectedComponentId) return;
+    if (selectedComponentIds.length === 0) return;
 
-    const component = findComponentById(fullComponents, selectedComponentId);
-    if (!component) return;
+    const elementsToCopy: CopiedElement[] = selectedComponentIds
+      .map(id => {
+        const component = findComponentById(fullComponents, id);
+        if (!component) return null;
 
-    const elementToCopy: CopiedElement = {
-      type: component.type,
-      attributes: { ...component.attributes }
-    };
+        return {
+          type: component.type,
+          attributes: { ...component.attributes }
+        };
+      })
+      .filter((el): el is CopiedElement => el !== null);
 
-    // 移除ID屬性，因為粘貼時需要生成新的ID
-    delete elementToCopy.attributes.id;
+    if (elementsToCopy.length > 0) {
+      setCopiedElement(elementsToCopy[0]); // 暫時只支持複製第一個元素
+      console.log('已複製元素:', elementsToCopy[0]);
+    }
+  }, [selectedComponentIds, fullComponents]);
 
-    setCopiedElement(elementToCopy);
-    console.log('已複製元素:', elementToCopy);
-  }, [selectedComponentId, fullComponents]);
-
-  // 粘貼組件
+  // 其他方法保持不變...
   const pasteComponent = useCallback(() => {
     if (!copiedElement) return;
 
@@ -118,22 +191,24 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
 
   // 更新組件層級
   const moveComponentLayer = useCallback((direction: 'up' | 'down') => {
-    if (!selectedComponentId) return;
+    if (selectedComponentIds.length === 0) return;
 
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(processedSvgCode, 'image/svg+xml');
-      const selectedElement = doc.getElementById(selectedComponentId);
 
-      if (!selectedElement || !selectedElement.parentNode) return;
+      selectedComponentIds.forEach(id => {
+        const selectedElement = doc.getElementById(id);
+        if (!selectedElement || !selectedElement.parentNode) return;
 
-      const parent = selectedElement.parentNode;
+        const parent = selectedElement.parentNode;
 
-      if (direction === 'up' && selectedElement.nextElementSibling) {
-        parent.insertBefore(selectedElement.nextElementSibling, selectedElement);
-      } else if (direction === 'down' && selectedElement.previousElementSibling) {
-        parent.insertBefore(selectedElement, selectedElement.previousElementSibling);
-      }
+        if (direction === 'up' && selectedElement.nextElementSibling) {
+          parent.insertBefore(selectedElement.nextElementSibling, selectedElement);
+        } else if (direction === 'down' && selectedElement.previousElementSibling) {
+          parent.insertBefore(selectedElement, selectedElement.previousElementSibling);
+        }
+      });
 
       const serializer = new XMLSerializer();
       const updatedSvg = serializer.serializeToString(doc);
@@ -147,7 +222,7 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     } catch (error) {
       console.error('移動元素層級時出錯:', error);
     }
-  }, [selectedComponentId, processedSvgCode]);
+  }, [selectedComponentIds, processedSvgCode]);
 
   // 切換網格顯示
   const toggleGrid = useCallback(() => {
@@ -206,7 +281,7 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     processedSvgCode,
     components: flatComponents,
     fullComponents,
-    selectedComponentId,
+    selectedComponentIds,
     selectComponent,
     hoveredComponentId,
     hoverComponent,
@@ -214,6 +289,8 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     toggleGrid,
     validationError,
     updateComponentProperty,
+    batchUpdateProperty,
+    getCommonProperties,
     copyComponent,
     pasteComponent,
     moveComponentLayer,

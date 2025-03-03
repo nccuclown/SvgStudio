@@ -6,7 +6,7 @@ import { ZoomIn, ZoomOut } from "lucide-react";
 interface PreviewProps {
   svgCode: string;
   showGrid: boolean;
-  selectedComponentId: string | null;
+  selectedComponentIds: string[];
   hoveredComponentId: string | null;
   isFullscreen?: boolean;
 }
@@ -14,7 +14,7 @@ interface PreviewProps {
 export function Preview({
   svgCode,
   showGrid,
-  selectedComponentId,
+  selectedComponentIds,
   hoveredComponentId,
   isFullscreen = false,
 }: PreviewProps) {
@@ -37,7 +37,6 @@ export function Preview({
     const preview = containerRef.current.querySelector(".svg-preview");
     if (!preview) return;
 
-    // 查找SVG元素
     const svgElement = preview.querySelector("svg");
     if (!svgElement) return;
 
@@ -48,7 +47,7 @@ export function Preview({
         el.removeAttribute("data-highlight");
       });
 
-      // 多種策略查找和高亮懸停元素
+      // 高亮懸停元素
       if (hoveredComponentId) {
         let hoveredElement = svgElement.querySelector(`#${hoveredComponentId}`);
 
@@ -72,19 +71,16 @@ export function Preview({
 
         if (hoveredElement) {
           hoveredElement.setAttribute("data-highlight", "hover");
-          console.log(`[Preview] 高亮懸停元素: ${hoveredComponentId}`);
-        } else {
-          console.log(`[Preview] 未找到懸停元素: ${hoveredComponentId}`);
         }
       }
 
-      // 多種策略查找和高亮選中元素
-      if (selectedComponentId) {
-        let selectedElement = svgElement.querySelector(`#${selectedComponentId}`);
+      // 高亮選中的元素
+      selectedComponentIds.forEach(id => {
+        let selectedElement = svgElement.querySelector(`#${id}`);
 
         // 如果直接查找失敗，嘗試階層查找
-        if (!selectedElement && selectedComponentId.includes('-')) {
-          const parts = selectedComponentId.split('-');
+        if (!selectedElement && id.includes('-')) {
+          const parts = id.split('-');
           if (parts.length >= 3) {
             const groupId = parts[0];
             const elementType = parts[1];
@@ -102,15 +98,12 @@ export function Preview({
 
         if (selectedElement) {
           selectedElement.setAttribute("data-highlight", "selected");
-          console.log(`[Preview] 高亮選中元素: ${selectedComponentId}`);
-        } else {
-          console.log(`[Preview] 未找到選中元素: ${selectedComponentId}`);
         }
-      }
+      });
     } catch (error) {
       console.error("元素高亮處理錯誤:", error);
     }
-  }, [selectedComponentId, hoveredComponentId, svgCode]);
+  }, [selectedComponentIds, hoveredComponentId, svgCode]);
 
   // 準備SVG代碼，添加高亮樣式
   const enhancedSvg = `

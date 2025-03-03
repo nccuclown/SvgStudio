@@ -10,8 +10,10 @@ import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PropertyPanelProps {
-  component: SVGComponent | null;
+  components: SVGComponent[] | null;
+  commonProperties: Record<string, string | null> | null;
   onPropertyChange: (id: string, property: string, value: string) => void;
+  onBatchUpdate: (property: string, operation: 'increase' | 'decrease', amount: number) => void;
 }
 
 // 屬性分類
@@ -20,16 +22,16 @@ const STYLE_PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'opac
 const TEXT_PROPS = ['_text', 'text-anchor', 'font-family', 'font-size', 'font-weight'];
 const ANIMATION_PROPS = ['dur', 'repeatCount', 'values', 'attributeName', 'begin', 'from', 'to', 'keyTimes', 'keySplines'];
 
-// 修正：永遠返回一個字符串，避免null導致的渲染問題
-function buildElementPath(component: SVGComponent | null): string {
+// 可以批量調整的屬性
+const NUMERIC_PROPS = ['width', 'height', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'stroke-width', 'opacity'];
+
+function buildElementPath(component: SVGComponent): string {
   if (!component) return '';
 
   const parts = [];
 
-  // 解析ID獲取層級關係
   if (component.id.includes('-')) {
     const idParts = component.id.split('-');
-    // 如果ID形如 "parent-type-index"
     if (idParts.length >= 3) {
       parts.push(idParts[0]);
     }
@@ -41,8 +43,10 @@ function buildElementPath(component: SVGComponent | null): string {
 }
 
 export function PropertyPanel({
-  component,
-  onPropertyChange
+  components,
+  commonProperties,
+  onPropertyChange,
+  onBatchUpdate
 }: PropertyPanelProps) {
   const [lastUpdateStatus, setLastUpdateStatus] = useState<'success' | 'error' | null>(null);
 
@@ -55,18 +59,17 @@ export function PropertyPanel({
   };
 
   const propertyGroups = useMemo(() => {
-    if (!component) return emptyGroups;
+    if (!commonProperties) return emptyGroups;
 
-    const attributes = component.attributes;
     const groups = {
-      basic: [] as [string, string][],
-      style: [] as [string, string][],
-      text: [] as [string, string][],
-      animation: [] as [string, string][],
-      other: [] as [string, string][]
+      basic: [] as [string, string | null][],
+      style: [] as [string, string | null][],
+      text: [] as [string, string | null][],
+      animation: [] as [string, string | null][],
+      other: [] as [string, string | null][]
     };
 
-    Object.entries(attributes).forEach(([key, value]) => {
+    Object.entries(commonProperties).forEach(([key, value]) => {
       if (BASIC_PROPS.includes(key)) {
         groups.basic.push([key, value]);
       } else if (STYLE_PROPS.includes(key) || key.startsWith('style-')) {
@@ -81,123 +84,122 @@ export function PropertyPanel({
     });
 
     return groups;
-  }, [component]);
+  }, [commonProperties]);
 
-  const fullPath = component ? buildElementPath(component) : '未選擇元件';
-
-  if (!component) {
+  if (!components || components.length === 0) {
     return (
       <div className="p-4 text-center text-muted-foreground">
-        選擇一個元件來查看屬性
+        選擇一個或多個元件來查看屬性
       </div>
     );
   }
 
-  const renderPropertyEditor = (property: string, value: string) => {
-    const handleChange = (newValue: string) => {
-      console.log(`[PropertyPanel] 屬性變更:`, {
-        componentId: component.id,
-        property,
-        oldValue: value,
-        newValue
-      });
-
-      try {
-        const actualValue = newValue === '' ? '0' : newValue;
-        const actualProperty = property.startsWith('style-') ? property : property;
-        onPropertyChange(component.id, actualProperty, actualValue);
-        setLastUpdateStatus('success');
-      } catch (error) {
-        console.error(`[PropertyPanel] 屬性更新失敗:`, error);
-        setLastUpdateStatus('error');
-      }
-    };
-
-    // 顏色屬性需要顏色選擇器
-    if (property === 'fill' || property === 'stroke' || property === 'style-fill' || property === 'style-stroke') {
-      return (
-        <div className="flex gap-2">
-          <Input
-            type="color"
-            value={value}
-            className="w-12"
-            onChange={(e) => handleChange(e.target.value)}
-          />
-          <Input
-            value={value}
-            className="flex-1"
-            onChange={(e) => handleChange(e.target.value)}
-          />
-        </div>
-      );
-    }
-
-    // 路徑數據需要多行文本框
-    else if (property === 'd' || property === 'points' || property === '_text') {
-      return (
-        <Textarea
-          value={value}
-          rows={4}
-          onChange={(e) => handleChange(e.target.value)}
-        />
-      );
-    }
-
-    // 數值屬性使用文本輸入框，外部添加上下調整按鈕
-    else if (
-      ['width', 'height', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'opacity', 'stroke-width']
-        .includes(property) || property.match(/^style-(opacity|stroke-width)$/)
-    ) {
+  const renderPropertyEditor = (property: string, value: string | null) => {
+    // 如果是數值類型的屬性，顯示批量調整按鈕
+    if (NUMERIC_PROPS.includes(property)) {
+      const step = property.includes('opacity') ? 0.1 : 1;
       return (
         <div className="flex gap-2 items-center">
-          <Input
-            value={value}
-            onChange={(e) => handleChange(e.target.value)}
-            className="flex-1"
-          />
-          <div className="flex flex-col">
+          <div className="flex-1">
+            {value === null ? (
+              <div className="text-sm text-muted-foreground italic">
+                多個不同的值
+              </div>
+            ) : (
+              <Input
+                value={value}
+                onChange={(e) => {
+                  if (components.length === 1) {
+                    onPropertyChange(components[0].id, property, e.target.value);
+                  }
+                }}
+                readOnly={components.length > 1}
+                className="flex-1"
+              />
+            )}
+          </div>
+          <div className="flex gap-1">
             <Button
               variant="outline"
-              size="icon"
-              className="h-5 px-2 rounded-b-none hover:bg-accent"
-              onClick={() => {
-                const step = property.includes('opacity') ? 0.1 : 1;
-                const newValue = parseFloat(value) + step;
-                if (property.includes('opacity') && newValue > 1) return;
-                handleChange(newValue.toString());
-              }}
+              size="sm"
+              onClick={() => onBatchUpdate(property, 'decrease', step)}
+              className="px-2 hover:bg-accent"
             >
-              ▲
+              -
             </Button>
             <Button
               variant="outline"
-              size="icon"
-              className="h-5 px-2 rounded-t-none border-t-0 hover:bg-accent"
-              onClick={() => {
-                const step = property.includes('opacity') ? 0.1 : 1;
-                const newValue = Math.max(parseFloat(value) - step, 0);
-                handleChange(newValue.toString());
-              }}
+              size="sm"
+              onClick={() => onBatchUpdate(property, 'increase', step)}
+              className="px-2 hover:bg-accent"
             >
-              ▼
+              +
             </Button>
           </div>
         </div>
       );
     }
 
-    // 默認使用文本輸入框
-    else {
+    // 顏色屬性
+    if (property === 'fill' || property === 'stroke' || property === 'style-fill' || property === 'style-stroke') {
       return (
-        <Input
-          value={value}
-          onChange={(e) => handleChange(e.target.value)}
+        <div className="flex gap-2">
+          <Input
+            type="color"
+            value={value || ''}
+            className="w-12"
+            onChange={(e) => {
+              if (components.length === 1) {
+                onPropertyChange(components[0].id, property, e.target.value);
+              }
+            }}
+            disabled={components.length > 1}
+          />
+          <Input
+            value={value || ''}
+            onChange={(e) => {
+              if (components.length === 1) {
+                onPropertyChange(components[0].id, property, e.target.value);
+              }
+            }}
+            readOnly={components.length > 1}
+            className="flex-1"
+          />
+        </div>
+      );
+    }
+
+    // 路徑數據需要多行文本框
+    if (property === 'd' || property === 'points' || property === '_text') {
+      return (
+        <Textarea
+          value={value || ''}
+          rows={4}
+          onChange={(e) => {
+            if (components.length === 1) {
+              onPropertyChange(components[0].id, property, e.target.value);
+            }
+          }}
+          readOnly={components.length > 1}
         />
       );
     }
+
+    // 默認使用文本輸入框
+    return (
+      <Input
+        value={value || ''}
+        onChange={(e) => {
+          if (components.length === 1) {
+            onPropertyChange(components[0].id, property, e.target.value);
+          }
+        }}
+        readOnly={components.length > 1}
+      />
+    );
   };
 
-  const renderPropertyGroup = (properties: [string, string][]) => {
+  const renderPropertyGroup = (properties: [string, string | null][]) => {
     if (properties.length === 0) {
       return (
         <div className="text-sm text-muted-foreground py-2">
@@ -230,11 +232,16 @@ export function PropertyPanel({
     <div className="p-4 h-full">
       <div className="mb-4">
         <h3 className="text-sm font-medium">
-          {component?.type} <span className="text-muted-foreground">({component?.id})</span>
+          {components.length > 1 
+            ? `已選擇 ${components.length} 個元件`
+            : `${components[0].type} (${components[0].id})`
+          }
         </h3>
-        <div className="text-xs text-muted-foreground mt-1 bg-muted p-1 rounded">
-          <span className="font-mono">完整路徑: {fullPath}</span>
-        </div>
+        {components.length === 1 && (
+          <div className="text-xs text-muted-foreground mt-1 bg-muted p-1 rounded">
+            <span className="font-mono">完整路徑: {buildElementPath(components[0])}</span>
+          </div>
+        )}
       </div>
 
       {lastUpdateStatus === 'error' && (
