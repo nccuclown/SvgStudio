@@ -71,10 +71,10 @@ export function SplitPane({
           </Button>
         </div>
         <Preview
-          svg={code}
+          svgCode={code}
           showGrid={showGrid}
-          selectedComponent={selectedComponent}
-          hoveredComponent={hoveredComponent}
+          selectedComponentId={selectedComponent}
+          hoveredComponentId={hoveredComponent}
           isFullscreen={true}
         />
       </div>
@@ -114,17 +114,16 @@ export function SplitPane({
           <CodeEditor
             value={code}
             onChange={onCodeChange}
-            error={validationError}
             selectedComponent={selectedComponent}
           />
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={70} minSize={50}>
           <Preview
-            svg={code}
+            svgCode={code}
             showGrid={showGrid}
-            selectedComponent={selectedComponent}
-            hoveredComponent={hoveredComponent}
+            selectedComponentId={selectedComponent}
+            hoveredComponentId={hoveredComponent}
             isFullscreen={false}
           />
         </ResizablePanel>

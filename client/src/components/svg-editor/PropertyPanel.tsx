@@ -109,9 +109,11 @@ export function PropertyPanel({
       });
 
       try {
+        // 處理空值或0的情況
+        const actualValue = newValue === '' ? '0' : newValue;
         // 如果是樣式屬性，需要添加 style- 前綴
         const actualProperty = property.startsWith('style-') ? property : property;
-        onPropertyChange(component.id, actualProperty, newValue);
+        onPropertyChange(component.id, actualProperty, actualValue);
         setLastUpdateStatus('success');
       } catch (error) {
         console.error(`[PropertyPanel] 屬性更新失敗:`, error);

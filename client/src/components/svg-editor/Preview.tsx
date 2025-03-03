@@ -1,5 +1,7 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ZoomIn, ZoomOut } from "lucide-react";
 
 interface PreviewProps {
   svgCode: string;
@@ -17,6 +19,16 @@ export function Preview({
   isFullscreen = false,
 }: PreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  // 縮放控制函數
+  const handleZoomIn = () => {
+    setScale(prev => Math.min(prev + 0.1, 3));
+  };
+
+  const handleZoomOut = () => {
+    setScale(prev => Math.max(prev - 0.1, 0.1));
+  };
 
   // 高亮選中和懸停的元素
   useEffect(() => {
@@ -123,6 +135,26 @@ export function Preview({
         showGrid && "bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAyMCAwIEwgMCAwIDAgMjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgxMDAsIDEwMCwgMTAwLCAwLjIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')]"
       )}
     >
+      {/* 縮放控制按鈕 */}
+      <div className="absolute top-2 right-2 flex gap-2 z-10">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleZoomOut}
+          className="hover:bg-accent"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleZoomIn}
+          className="hover:bg-accent"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+      </div>
+
       <div className={cn(
         "min-h-full flex items-center justify-center p-4",
         isFullscreen ? "min-h-screen" : ""
@@ -132,6 +164,11 @@ export function Preview({
             "svg-preview max-w-full max-h-full overflow-auto bg-white dark:bg-gray-900 rounded-md shadow-sm",
             isFullscreen ? "w-[90vw] h-[90vh]" : "w-full h-full"
           )}
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: 'center center',
+            transition: 'transform 0.2s ease-in-out'
+          }}
           dangerouslySetInnerHTML={{ __html: enhancedSvg }}
         />
       </div>
