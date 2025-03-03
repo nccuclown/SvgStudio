@@ -5,6 +5,7 @@ import { ChevronRight, ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { FlatComponent } from "@/lib/svg-utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Tooltip,
   TooltipContent,
@@ -23,8 +24,8 @@ interface TreeNode {
 
 interface ComponentTreeProps {
   components: FlatComponent[];
-  selectedComponent: string | null;
-  onSelectComponent: (id: string) => void;
+  selectedComponentIds: string[];
+  onSelectComponent: (id: string | null, isMultiSelect?: boolean) => void;
   onHoverComponent: (id: string | null) => void;
 }
 
@@ -33,7 +34,7 @@ function getElementDescription(node: TreeNode): string {
   const attrs = node.attributes || {};
   let desc = '';
 
-  // ID資訊 (新增)
+  // ID資訊
   desc += `ID: ${node.id} `;
 
   // 文本內容
@@ -135,15 +136,15 @@ function buildTree(components: FlatComponent[]): TreeNode[] {
 function TreeNodeComponent({
   node,
   level = 0,
-  selectedComponent,
+  selectedComponentIds,
   onSelectComponent,
   onHoverComponent,
   searchTerm = ''
 }: {
   node: TreeNode;
   level?: number;
-  selectedComponent: string | null;
-  onSelectComponent: (id: string) => void;
+  selectedComponentIds: string[];
+  onSelectComponent: (id: string | null, isMultiSelect?: boolean) => void;
   onHoverComponent: (id: string | null) => void;
   searchTerm?: string;
 }) {
@@ -166,12 +167,6 @@ function TreeNodeComponent({
     setIsExpanded(!isExpanded);
   };
 
-  // 處理節點點擊
-  const handleNodeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSelectComponent(node.id);
-  };
-
   if (node.isHidden) return null;
 
   return (
@@ -179,11 +174,18 @@ function TreeNodeComponent({
       <div 
         className={cn(
           "flex items-center py-1 px-1 rounded-sm hover:bg-accent/50 transition-colors",
-          selectedComponent === node.id && "bg-accent",
+          selectedComponentIds.includes(node.id) && "bg-accent",
           isMatch && "bg-accent/20"
         )}
         style={{ paddingLeft: `${level * 16}px` }}
       >
+        <Checkbox 
+          checked={selectedComponentIds.includes(node.id)}
+          onCheckedChange={(checked) => {
+            onSelectComponent(node.id, true);
+          }}
+          className="mr-2"
+        />
         {hasChildren ? (
           <Button
             variant="ghost"
@@ -208,7 +210,7 @@ function TreeNodeComponent({
                 className="flex-1 flex items-center gap-2 cursor-pointer text-sm pl-1 py-0.5"
                 onMouseEnter={() => onHoverComponent(node.id)}
                 onMouseLeave={() => onHoverComponent(null)}
-                onClick={handleNodeClick}
+                onClick={() => onSelectComponent(node.id)}
               >
                 <span className={cn(
                   "font-medium",
@@ -242,7 +244,7 @@ function TreeNodeComponent({
               key={child.id}
               node={child}
               level={level + 1}
-              selectedComponent={selectedComponent}
+              selectedComponentIds={selectedComponentIds}
               onSelectComponent={onSelectComponent}
               onHoverComponent={onHoverComponent}
               searchTerm={searchTerm}
@@ -256,7 +258,7 @@ function TreeNodeComponent({
 
 export function ComponentTree({
   components,
-  selectedComponent,
+  selectedComponentIds,
   onSelectComponent,
   onHoverComponent,
 }: ComponentTreeProps) {
@@ -289,7 +291,7 @@ export function ComponentTree({
                 <TreeNodeComponent
                   key={node.id}
                   node={node}
-                  selectedComponent={selectedComponent}
+                  selectedComponentIds={selectedComponentIds}
                   onSelectComponent={onSelectComponent}
                   onHoverComponent={onHoverComponent}
                   searchTerm={searchTerm}
