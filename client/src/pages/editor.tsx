@@ -11,7 +11,17 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid, Image, Code, Maximize, Minimize } from "lucide-react";
+import { 
+  Grid,
+  Image,
+  Code,
+  Maximize,
+  Minimize,
+  Copy,
+  Clipboard,
+  ArrowUpCircle,
+  ArrowDownCircle
+} from "lucide-react";
 import { findComponentById } from "@/lib/svg-utils";
 
 export default function Editor() {
@@ -28,16 +38,18 @@ export default function Editor() {
     showGrid,
     toggleGrid,
     updateComponentProperty,
+    copyComponent,
+    pasteComponent,
+    moveComponentLayer,
+    hasCopiedElement
   } = useSvgEditor();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // 獲取選中的組件詳情
   const selectedComponent = selectedComponentId 
     ? findComponentById(fullComponents, selectedComponentId)
     : null;
 
-  // 切換全屏模式
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
@@ -50,6 +62,48 @@ export default function Editor() {
           <span className="font-bold text-xl">SVG編輯器</span>
         </div>
         <div className="flex items-center gap-2">
+          {/* 元素管理按鈕 */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={copyComponent}
+            disabled={!selectedComponentId}
+            className="hover:bg-accent"
+            title="複製元素"
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={pasteComponent}
+            disabled={!hasCopiedElement}
+            className="hover:bg-accent"
+            title="粘貼元素"
+          >
+            <Clipboard className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => moveComponentLayer('up')}
+            disabled={!selectedComponentId}
+            className="hover:bg-accent"
+            title="上移一層"
+          >
+            <ArrowUpCircle className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => moveComponentLayer('down')}
+            disabled={!selectedComponentId}
+            className="hover:bg-accent"
+            title="下移一層"
+          >
+            <ArrowDownCircle className="h-4 w-4" />
+          </Button>
+          {/* 原有的按鈕 */}
           <Button variant="outline" size="icon" onClick={toggleGrid}>
             <Grid className={`h-4 w-4 ${showGrid ? "text-primary" : ""}`} />
           </Button>
