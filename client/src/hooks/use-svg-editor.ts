@@ -19,8 +19,11 @@ const DEFAULT_SVG = `<svg width="200" height="200" xmlns="http://www.w3.org/2000
  * SVG 編輯器自定義 Hook
  */
 export function useSvgEditor(initialSvg = DEFAULT_SVG) {
-  // SVG 代碼
-  const [svgCode, setSvgCode] = useState<string>(initialSvg);
+  // 原始SVG代碼
+  const [originalSvgCode, setOriginalSvgCode] = useState<string>(initialSvg);
+
+  // 處理後的SVG代碼（帶有ID）
+  const [processedSvgCode, setProcessedSvgCode] = useState<string>('');
 
   // 組件結構
   const [flatComponents, setFlatComponents] = useState<FlatComponent[]>([]);
@@ -37,9 +40,9 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
   // 解析 SVG 代碼
   useEffect(() => {
     try {
-      // 驗證 SVG 語法
+      // 驗證原始 SVG 語法
       const parser = new DOMParser();
-      const doc = parser.parseFromString(svgCode, "image/svg+xml");
+      const doc = parser.parseFromString(originalSvgCode, "image/svg+xml");
       const errorNode = doc.querySelector("parsererror");
 
       if (errorNode) {
@@ -50,19 +53,24 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
       // 清除驗證錯誤
       setValidationError(null);
 
-      // 解析 SVG 組件
-      const components = parseSvgComponents(svgCode);
+      // 解析 SVG 組件（這個過程會生成帶有ID的新SVG）
+      const components = parseSvgComponents(originalSvgCode);
       setFullComponents(components);
 
       // 扁平化組件結構
       const flattened = flattenSvgComponents(components);
       setFlatComponents(flattened);
 
+      // 獲取處理後的SVG代碼
+      const processedDoc = parser.parseFromString(originalSvgCode, "image/svg+xml");
+      const serializer = new XMLSerializer();
+      setProcessedSvgCode(serializer.serializeToString(processedDoc));
+
     } catch (error) {
       console.error("解析 SVG 時出錯:", error);
       setValidationError((error as Error).message);
     }
-  }, [svgCode]);
+  }, [originalSvgCode]);
 
   // 更新組件屬性
   const updateComponentProperty = useCallback((id: string, property: string, value: string) => {
@@ -73,19 +81,20 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     });
 
     try {
-      console.log(`[updateComponentProperty] 當前 SVG 代碼長度:`, svgCode.length);
-      const updatedSvg = updateSvgComponent(svgCode, id, property, value);
+      const updatedSvg = updateSvgComponent(processedSvgCode, id, property, value);
 
-      if (updatedSvg !== svgCode) {
-        console.log(`[updateComponentProperty] SVG 已更新，新代碼長度:`, updatedSvg.length);
-        setSvgCode(updatedSvg);
-      } else {
-        console.warn(`[updateComponentProperty] SVG 未發生變化`);
+      if (updatedSvg !== processedSvgCode) {
+        setProcessedSvgCode(updatedSvg);
+
+        // 重新解析組件結構
+        const components = parseSvgComponents(updatedSvg);
+        setFullComponents(components);
+        setFlatComponents(flattenSvgComponents(components));
       }
     } catch (error) {
       console.error(`[updateComponentProperty] 更新過程中出錯:`, error);
     }
-  }, [svgCode]);
+  }, [processedSvgCode]);
 
   // 切換網格顯示
   const toggleGrid = useCallback(() => {
@@ -103,8 +112,9 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
   }, []);
 
   return {
-    svgCode,
-    setSvgCode,
+    originalSvgCode,
+    setOriginalSvgCode,
+    processedSvgCode,
     components: flatComponents,
     fullComponents,
     selectedComponentId,

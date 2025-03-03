@@ -11,13 +11,14 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid, Image, Maximize, Minimize } from "lucide-react";
+import { Grid, Image, Code, Maximize, Minimize } from "lucide-react";
 import { findComponentById } from "@/lib/svg-utils";
 
 export default function Editor() {
   const {
-    svgCode,
-    setSvgCode,
+    originalSvgCode,
+    setOriginalSvgCode,
+    processedSvgCode,
     components,
     fullComponents,
     selectedComponentId,
@@ -87,27 +88,20 @@ export default function Editor() {
                   <Image className="h-4 w-4 mr-2" />
                   預覽
                 </TabsTrigger>
-                <TabsTrigger value="code">
-                  <svg
-                    className="h-4 w-4 mr-2"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="16 18 22 12 16 6" />
-                    <polyline points="8 6 2 12 8 18" />
-                  </svg>
-                  代碼
+                <TabsTrigger value="original">
+                  <Code className="h-4 w-4 mr-2" />
+                  原始代碼
+                </TabsTrigger>
+                <TabsTrigger value="processed">
+                  <Code className="h-4 w-4 mr-2" />
+                  處理後代碼
                 </TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value="preview" className="flex-1 p-0">
               <Preview
-                svgCode={svgCode}
+                svgCode={processedSvgCode}
                 showGrid={showGrid}
                 selectedComponentId={selectedComponentId}
                 hoveredComponentId={hoveredComponentId}
@@ -115,10 +109,18 @@ export default function Editor() {
               />
             </TabsContent>
 
-            <TabsContent value="code" className="flex-1 p-0">
+            <TabsContent value="original" className="flex-1 p-0">
               <CodeEditor
-                value={svgCode}
-                onChange={setSvgCode}
+                value={originalSvgCode}
+                onChange={setOriginalSvgCode}
+                selectedComponent={selectedComponentId}
+              />
+            </TabsContent>
+
+            <TabsContent value="processed" className="flex-1 p-0">
+              <CodeEditor
+                value={processedSvgCode}
+                readOnly={true}
                 selectedComponent={selectedComponentId}
               />
             </TabsContent>
