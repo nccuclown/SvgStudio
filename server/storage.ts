@@ -1,15 +1,14 @@
 import { users, type User, type InsertUser } from "@shared/schema";
 import { svgDocuments, type SvgDocument, type InsertSvgDocument } from "@shared/schema";
 
-// modify the interface with any CRUD methods
-// you might need
-
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getDocument(id: number): Promise<SvgDocument | undefined>;
   createDocument(document: InsertSvgDocument): Promise<SvgDocument>;
+  listDocuments(): Promise<SvgDocument[]>;
+  updateDocument(id: number, content: string): Promise<SvgDocument | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -46,9 +45,32 @@ export class MemStorage implements IStorage {
 
   async createDocument(insertDocument: InsertSvgDocument): Promise<SvgDocument> {
     const id = this.currentId++;
-    const document: SvgDocument = { ...insertDocument, id };
+    const now = new Date();
+    const document: SvgDocument = {
+      ...insertDocument,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
     this.documents.set(id, document);
     return document;
+  }
+
+  async listDocuments(): Promise<SvgDocument[]> {
+    return Array.from(this.documents.values());
+  }
+
+  async updateDocument(id: number, content: string): Promise<SvgDocument | undefined> {
+    const document = this.documents.get(id);
+    if (!document) return undefined;
+
+    const updatedDocument: SvgDocument = {
+      ...document,
+      content,
+      updatedAt: new Date()
+    };
+    this.documents.set(id, updatedDocument);
+    return updatedDocument;
   }
 }
 
