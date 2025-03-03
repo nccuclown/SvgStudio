@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, Minimize2 } from "lucide-react";
 
 interface PreviewProps {
   svgCode: string;
@@ -20,6 +20,7 @@ export function Preview({
 }: PreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   // 縮放控制函數
   const handleZoomIn = () => {
@@ -29,6 +30,27 @@ export function Preview({
   const handleZoomOut = () => {
     setScale(prev => Math.max(prev - 0.1, 0.1));
   };
+
+  // 全螢幕控制
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  // 監聽全螢幕狀態變化
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   // 高亮選中和懸停的元素
   useEffect(() => {
@@ -128,13 +150,14 @@ export function Preview({
         showGrid && "bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAyMCAwIEwgMCAwIDAgMjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgxMDAsIDEwMCwgMTAwLCAwLjIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')]"
       )}
     >
-      {/* 縮放控制按鈕 */}
+      {/* 控制按鈕 */}
       <div className="absolute top-2 right-2 flex gap-2 z-10">
         <Button
           variant="outline"
           size="icon"
           onClick={handleZoomOut}
           className="hover:bg-accent"
+          title="縮小"
         >
           <ZoomOut className="h-4 w-4" />
         </Button>
@@ -143,19 +166,33 @@ export function Preview({
           size="icon"
           onClick={handleZoomIn}
           className="hover:bg-accent"
+          title="放大"
         >
           <ZoomIn className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={toggleFullScreen}
+          className="hover:bg-accent"
+          title={isFullScreen ? "退出全螢幕" : "進入全螢幕"}
+        >
+          {isFullScreen ? (
+            <Minimize2 className="h-4 w-4" />
+          ) : (
+            <Maximize2 className="h-4 w-4" />
+          )}
         </Button>
       </div>
 
       <div className={cn(
         "min-h-full flex items-center justify-center p-4",
-        isFullscreen ? "min-h-screen" : ""
+        isFullScreen ? "min-h-screen" : ""
       )}>
         <div 
           className={cn(
             "svg-preview max-w-full max-h-full overflow-auto bg-white dark:bg-gray-900 rounded-md shadow-sm",
-            isFullscreen ? "w-[90vw] h-[90vh]" : "w-full h-full"
+            isFullScreen ? "w-[90vw] h-[90vh]" : "w-full h-full"
           )}
           style={{
             transform: `scale(${scale})`,
