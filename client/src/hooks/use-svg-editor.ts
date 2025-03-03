@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { 
   parseSvgComponents, 
   flattenSvgComponents, 
@@ -37,6 +37,9 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
   const [showGrid, setShowGrid] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // 使用ref存儲DOM實例，避免重複解析
+  const svgDomRef = useRef<Document | null>(null);
+
   // 解析 SVG 代碼
   useEffect(() => {
     try {
@@ -52,6 +55,9 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
 
       // 清除驗證錯誤
       setValidationError(null);
+
+      // 保存解析後的DOM實例
+      svgDomRef.current = doc;
 
       // 解析 SVG 組件（這個過程會生成帶有ID的新SVG）
       const components = parseSvgComponents(originalSvgCode);
@@ -85,6 +91,7 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     });
 
     try {
+      // 使用更新函數
       const updatedSvg = updateSvgComponent(processedSvgCode, id, property, value);
 
       if (updatedSvg !== processedSvgCode) {
@@ -94,6 +101,8 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
         const components = parseSvgComponents(updatedSvg);
         setFullComponents(components);
         setFlatComponents(flattenSvgComponents(components));
+      } else {
+        console.warn(`[updateComponentProperty] 未能更新組件：${id}`);
       }
     } catch (error) {
       console.error(`[updateComponentProperty] 更新過程中出錯:`, error);
@@ -107,6 +116,7 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
 
   // 更新選中組件
   const selectComponent = useCallback((id: string | null) => {
+    console.log(`[selectComponent] 選中組件: ${id}`);
     setSelectedComponentId(id);
   }, []);
 
@@ -114,6 +124,37 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
   const hoverComponent = useCallback((id: string | null) => {
     setHoveredComponentId(id);
   }, []);
+
+  // 提供詳細的組件信息
+  const getComponentDetails = useCallback((id: string | null) => {
+    if (!id) return null;
+
+    const component = findComponentById(fullComponents, id);
+    if (!component) {
+      console.warn(`[getComponentDetails] 未找到組件: ${id}`);
+      return null;
+    }
+
+    // 計算路徑
+    let path = '';
+    let current = component;
+    const pathParts = [];
+
+    while (current) {
+      pathParts.unshift(current.type);
+      const parent = current.parentId ? findComponentById(fullComponents, current.parentId) : null;
+      current = parent as SVGComponent;
+    }
+
+    path = pathParts.join(' > ');
+
+    return {
+      id: component.id,
+      type: component.type,
+      path,
+      attributes: component.attributes
+    };
+  }, [fullComponents]);
 
   return {
     originalSvgCode,
@@ -128,6 +169,7 @@ export function useSvgEditor(initialSvg = DEFAULT_SVG) {
     showGrid,
     toggleGrid,
     validationError,
-    updateComponentProperty
+    updateComponentProperty,
+    getComponentDetails
   };
 }

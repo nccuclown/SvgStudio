@@ -1,16 +1,18 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import Editor, { Monaco } from "@monaco-editor/react";
 
 interface CodeEditorProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   selectedComponent: string | null;
+  readOnly?: boolean;
 }
 
 export function CodeEditor({
   value,
   onChange,
-  selectedComponent
+  selectedComponent,
+  readOnly = false
 }: CodeEditorProps) {
   const editorRef = useRef<any>(null);
 
@@ -72,6 +74,8 @@ export function CodeEditor({
     if (!selectedComponent || !editorRef.current) return;
 
     const model = editorRef.current.getModel();
+    if (!model) return;
+
     const text = model.getValue();
     const regexp = new RegExp(`id="${selectedComponent}"[^>]*>`, 'i');
     const match = text.match(regexp);
@@ -89,12 +93,24 @@ export function CodeEditor({
     }
   };
 
+  // 當選中組件變化時，高亮代碼
+  useEffect(() => {
+    highlightSelectedComponent();
+  }, [selectedComponent]);
+
+  const handleChange = (value: string | undefined) => {
+    // 防禦性檢查，確保onChange存在且接收到值
+    if (onChange && typeof onChange === 'function' && value !== undefined) {
+      onChange(value);
+    }
+  };
+
   return (
     <Editor
       height="100%"
       defaultLanguage="xml"
       value={value}
-      onChange={(value) => onChange(value || '')}
+      onChange={handleChange}
       onMount={handleEditorDidMount}
       options={{
         minimap: { enabled: false },
@@ -106,6 +122,7 @@ export function CodeEditor({
         wordWrap: 'on',
         formatOnPaste: true,
         formatOnType: true,
+        readOnly: readOnly,
       }}
     />
   );

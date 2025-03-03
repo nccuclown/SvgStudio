@@ -17,6 +17,7 @@ export interface FlatComponent {
   attributes: Record<string, string>;
 }
 
+// 使用模塊作用域變數來確保正確重置
 let counter = 0;
 
 /**
@@ -45,6 +46,9 @@ function generateHierarchicalId(element: Element, parentId?: string): string {
  * 前置處理：為SVG中沒有ID的元素添加階層化ID
  */
 function preprocessSvg(svgString: string): string {
+  // 重置計數器以確保一致性
+  counter = 0;
+
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, "image/svg+xml");
 
@@ -57,16 +61,19 @@ function preprocessSvg(svgString: string): string {
   // 遞歸處理元素
   function processElement(element: Element, parentId?: string) {
     // 獲取或生成ID
-    const id = generateHierarchicalId(element, parentId);
+    const existingId = element.getAttribute('id');
+    const id = existingId || generateHierarchicalId(element, parentId);
 
     // 如果元素沒有ID，添加生成的ID
-    if (!element.hasAttribute('id')) {
+    if (!existingId) {
       element.setAttribute('id', id);
+      console.log(`[preprocessSvg] 添加ID: ${id} 到 ${element.tagName}`);
     }
 
-    // 處理子元素
+    // 處理子元素 - 使用當前元素的實際ID作為父ID
+    const currentId = element.getAttribute('id') || id;
     Array.from(element.children).forEach(child => {
-      processElement(child, id);
+      processElement(child, currentId);
     });
   }
 
@@ -96,9 +103,14 @@ function getElementAttributes(element: Element): Record<string, string> {
   const style = element.getAttribute('style');
   if (style) {
     style.split(';').forEach(prop => {
-      const [name, value] = prop.trim().split(':').map(s => s.trim());
-      if (name && value) {
-        attributes[`style-${name}`] = value;
+      if (!prop.trim()) return;
+      const parts = prop.trim().split(':');
+      if (parts.length >= 2) {
+        const name = parts[0].trim();
+        const value = parts.slice(1).join(':').trim();
+        if (name && value) {
+          attributes[`style-${name}`] = value;
+        }
       }
     });
   }
@@ -116,8 +128,11 @@ function getElementAttributes(element: Element): Record<string, string> {
  * 解析SVG為組件結構
  */
 export function parseSvgComponents(svgString: string): SVGComponent[] {
+  console.log(`[parseSvgComponents] 開始解析SVG`);
+
   // 前置處理：確保所有元素都有ID
   const processedSvg = preprocessSvg(svgString);
+  console.log(`[parseSvgComponents] 前置處理完成，開始構建組件樹`);
 
   const parser = new DOMParser();
   const doc = parser.parseFromString(processedSvg, "image/svg+xml");
@@ -156,6 +171,7 @@ export function parseSvgComponents(svgString: string): SVGComponent[] {
   if (svgElement) {
     const rootComponent = processElement(svgElement);
     components.push(rootComponent);
+    console.log(`[parseSvgComponents] 構建完成，根組件: ${rootComponent.id}, 子組件數: ${rootComponent.children.length}`);
   }
 
   return components;
@@ -183,11 +199,15 @@ export function flattenSvgComponents(components: SVGComponent[]): FlatComponent[
 }
 
 /**
- * 在組件樹中查找特定ID的組件
+ * 多層次查找策略：根據ID查找組件
  */
 export function findComponentById(components: SVGComponent[], id: string): SVGComponent | null {
+  console.log(`[findComponentById] 尋找組件: ${id}`);
+
+  // 1. 直接通過ID查找
   for (const component of components) {
     if (component.id === id) {
+      console.log(`[findComponentById] 直接找到組件: ${id}`);
       return component;
     }
 
@@ -195,6 +215,59 @@ export function findComponentById(components: SVGComponent[], id: string): SVGCo
     if (result) return result;
   }
 
+  // 2. 如果是階層ID，嘗試解析並部分匹配
+  if (id.includes('-')) {
+    console.log(`[findComponentById] 嘗試階層式查找: ${id}`);
+    const parts = id.split('-');
+    const rootId = parts[0];
+
+    // 找到根元素
+    for (const component of components) {
+      if (component.id === rootId) {
+        console.log(`[findComponentById] 找到父組件: ${rootId}`);
+        // 嘗試在子組件中查找匹配的類型和索引
+        if (parts.length > 2) {
+          const childType = parts[1];
+          const childIndex = parseInt(parts[2], 10);
+          return findChildByTypeAndIndex(component, childType, childIndex);
+        }
+      }
+
+      // 遞歸搜索
+      const foundRoot = findComponentById(component.children, rootId);
+      if (foundRoot) {
+        if (parts.length > 2) {
+          const childType = parts[1];
+          const childIndex = parseInt(parts[2], 10);
+          return findChildByTypeAndIndex(foundRoot, childType, childIndex);
+        }
+        return foundRoot;
+      }
+    }
+  }
+
+  console.log(`[findComponentById] 未找到組件: ${id}`);
+  return null;
+}
+
+/**
+ * 輔助函數：通過類型和索引查找子元素
+ */
+function findChildByTypeAndIndex(parent: SVGComponent, type: string, index: number): SVGComponent | null {
+  console.log(`[findChildByTypeAndIndex] 在 ${parent.id} 下尋找類型 ${type}, 索引 ${index}`);
+
+  let count = 0;
+  for (const child of parent.children) {
+    if (child.type.toLowerCase() === type.toLowerCase()) {
+      if (count === index) {
+        console.log(`[findChildByTypeAndIndex] 找到匹配元素: ${child.id}`);
+        return child;
+      }
+      count++;
+    }
+  }
+
+  console.log(`[findChildByTypeAndIndex] 未找到匹配元素，共有 ${count} 個 ${type} 類型元素`);
   return null;
 }
 
@@ -225,7 +298,73 @@ export function updateSvgComponent(
     }
 
     console.log(`[updateSvgComponent] 查找目標元素: ${componentId}`);
-    const element = doc.getElementById(componentId);
+
+    // 增強的元素查找策略
+    let element = null;
+
+    // 1. 直接通過ID查找
+    element = doc.getElementById(componentId);
+    if (element) {
+      console.log(`[updateSvgComponent] 直接找到元素: ${componentId}`);
+    }
+
+    // 2. 如果是階層ID，嘗試解析並查找
+    if (!element && componentId.includes('-')) {
+      console.log(`[updateSvgComponent] 嘗試階層式查找...`);
+      const parts = componentId.split('-');
+
+      // 如果格式是 "parent-type-index"
+      if (parts.length >= 3) {
+        const groupId = parts[0];
+        const elementType = parts[1];
+        const elementIndex = parseInt(parts[2], 10);
+
+        console.log(`[updateSvgComponent] 分解ID: ${groupId} > ${elementType} > ${elementIndex}`);
+
+        // 找到父組
+        const groupElement = doc.getElementById(groupId);
+        if (groupElement) {
+          console.log(`[updateSvgComponent] 找到父組: ${groupId}`);
+
+          // 找到指定類型的所有子元素
+          const matchingElements = Array.from(groupElement.querySelectorAll(elementType));
+          console.log(`[updateSvgComponent] 找到 ${matchingElements.length} 個 ${elementType} 元素`);
+
+          // 檢查索引是否在範圍內
+          if (elementIndex < matchingElements.length) {
+            element = matchingElements[elementIndex];
+            console.log(`[updateSvgComponent] 使用索引 ${elementIndex} 找到元素`);
+          }
+        }
+      }
+    }
+
+    // 3. 嘗試使用XPath查找
+    if (!element) {
+      try {
+        console.log(`[updateSvgComponent] 嘗試XPath查找...`);
+        // 嘗試各種可能的XPath表達式
+        const xpathExpressions = [
+          `//*[@id="${componentId}"]`,
+          `//g[@id="${componentId.split('-')[0]}"]/${componentId.split('-')[1]}[${parseInt(componentId.split('-')[2], 10) + 1}]`
+        ];
+
+        for (const xpath of xpathExpressions) {
+          try {
+            const result = document.evaluate(xpath, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+            element = result.singleNodeValue as Element;
+            if (element) {
+              console.log(`[updateSvgComponent] 使用XPath找到元素: ${xpath}`);
+              break;
+            }
+          } catch (e) {
+            console.log(`[updateSvgComponent] XPath表達式 ${xpath} 失敗`);
+          }
+        }
+      } catch (e) {
+        console.error(`[updateSvgComponent] XPath查找失敗:`, e);
+      }
+    }
 
     if (!element) {
       console.warn(`[updateSvgComponent] 未找到元素 "${componentId}"`);
@@ -248,6 +387,7 @@ export function updateSvgComponent(
         // 解析當前樣式
         const styles = new Map();
         currentStyle.split(';').forEach(pair => {
+          if (!pair.trim()) return;
           const [name, value] = pair.split(':').map(s => s.trim());
           if (name && value) {
             styles.set(name, value);

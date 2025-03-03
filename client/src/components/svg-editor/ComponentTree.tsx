@@ -33,6 +33,9 @@ function getElementDescription(node: TreeNode): string {
   const attrs = node.attributes || {};
   let desc = '';
 
+  // ID資訊 (新增)
+  desc += `ID: ${node.id} `;
+
   // 文本內容
   if (attrs['_text']) {
     desc += `"${attrs['_text'].slice(0, 20)}${attrs['_text'].length > 20 ? '...' : ''}" `;
@@ -222,8 +225,11 @@ function TreeNodeComponent({
               </div>
             </TooltipTrigger>
             <TooltipContent>
+              <p className="font-bold text-sm">{node.id}</p>
               <p>{description || '無描述'}</p>
-              <p className="text-xs text-muted-foreground">ID: {node.id}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                路徑: {Array(level).fill('..').join('/')}/<strong>{node.type}</strong>
+              </p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

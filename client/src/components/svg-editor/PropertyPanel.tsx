@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { SVGComponent } from "@/lib/svg-utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 interface PropertyPanelProps {
   component: SVGComponent | null;
@@ -17,30 +19,53 @@ const STYLE_PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'opac
 const TEXT_PROPS = ['_text', 'text-anchor', 'font-family', 'font-size', 'font-weight'];
 const ANIMATION_PROPS = ['dur', 'repeatCount', 'values', 'attributeName', 'begin', 'from', 'to', 'keyTimes', 'keySplines'];
 
+// 修正：永遠返回一個字符串，避免null導致的渲染問題
+function buildElementPath(component: SVGComponent | null): string {
+  if (!component) return '';
+
+  const parts = [];
+
+  // 解析ID獲取層級關係
+  if (component.id.includes('-')) {
+    const idParts = component.id.split('-');
+    // 如果ID形如 "parent-type-index"
+    if (idParts.length >= 3) {
+      parts.push(idParts[0]);
+    }
+  }
+
+  parts.push(component.type);
+
+  return parts.join(' > ');
+}
+
 export function PropertyPanel({
   component,
   onPropertyChange
 }: PropertyPanelProps) {
-  // 如果沒有選中任何組件，顯示提示
-  if (!component) {
-    return (
-      <div className="p-4 text-center text-muted-foreground">
-        選擇一個元件來查看屬性
-      </div>
-    );
-  }
+  // 重要修正：始終定義所有hooks，不管組件是否存在
+  const [lastUpdateStatus, setLastUpdateStatus] = useState<'success' | 'error' | null>(null);
 
-  // 分類屬性
+  // 創建一個空的屬性組，確保useMemo總是運行
+  const emptyGroups = {
+    basic: [],
+    style: [],
+    text: [],
+    animation: [],
+    other: []
+  };
+
+  // useMemo總是運行，不受component是否存在影響
   const propertyGroups = useMemo(() => {
-    if (!component) return {};
+    if (!component) return emptyGroups;
 
     const attributes = component.attributes;
-    const groups: Record<string, [string, string][]> = {
-      basic: [],
-      style: [],
-      text: [],
-      animation: [],
-      other: []
+    const groups = {
+      basic: [] as [string, string][],
+      style: [] as [string, string][],
+      text: [] as [string, string][],
+      animation: [] as [string, string][],
+      other: [] as [string, string][]
     };
 
     // 分類所有屬性
@@ -59,7 +84,19 @@ export function PropertyPanel({
     });
 
     return groups;
-  }, [component]);
+  }, [component]);  // 只依賴component，確保一致性
+
+  // 計算完整路徑
+  const fullPath = component ? buildElementPath(component) : '未選擇元件';
+
+  // 如果沒有選中任何組件，顯示提示
+  if (!component) {
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        選擇一個元件來查看屬性
+      </div>
+    );
+  }
 
   // 渲染特定類型的屬性編輯器
   const renderPropertyEditor = (property: string, value: string) => {
@@ -71,9 +108,15 @@ export function PropertyPanel({
         newValue
       });
 
-      // 如果是樣式屬性，需要添加 style- 前綴
-      const actualProperty = property.startsWith('style-') ? property : property;
-      onPropertyChange(component.id, actualProperty, newValue);
+      try {
+        // 如果是樣式屬性，需要添加 style- 前綴
+        const actualProperty = property.startsWith('style-') ? property : property;
+        onPropertyChange(component.id, actualProperty, newValue);
+        setLastUpdateStatus('success');
+      } catch (error) {
+        console.error(`[PropertyPanel] 屬性更新失敗:`, error);
+        setLastUpdateStatus('error');
+      }
     };
 
     // 顏色屬性需要顏色選擇器
@@ -171,7 +214,20 @@ export function PropertyPanel({
         <h3 className="text-sm font-medium">
           {component.type} <span className="text-muted-foreground">({component.id})</span>
         </h3>
+        {/* 添加元素路徑顯示 */}
+        <div className="text-xs text-muted-foreground mt-1 bg-muted p-1 rounded">
+          <span className="font-mono">完整路徑: {fullPath}</span>
+        </div>
       </div>
+
+      {lastUpdateStatus === 'error' && (
+        <Alert variant="destructive" className="mb-4">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            無法更新屬性，請檢查元素ID是否正確
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Tabs defaultValue="basic">
         <TabsList className="grid grid-cols-3 mb-4">

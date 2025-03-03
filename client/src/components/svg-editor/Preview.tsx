@@ -36,19 +36,63 @@ export function Preview({
         el.removeAttribute("data-highlight");
       });
 
-      // 高亮懸停元素
+      // 多種策略查找和高亮懸停元素
       if (hoveredComponentId) {
-        const hoveredElement = svgElement.querySelector(`#${hoveredComponentId}`);
+        let hoveredElement = svgElement.querySelector(`#${hoveredComponentId}`);
+
+        // 如果直接查找失敗，嘗試階層查找
+        if (!hoveredElement && hoveredComponentId.includes('-')) {
+          const parts = hoveredComponentId.split('-');
+          if (parts.length >= 3) {
+            const groupId = parts[0];
+            const elementType = parts[1];
+            const elementIndex = parseInt(parts[2], 10);
+
+            const groupElement = svgElement.querySelector(`#${groupId}`);
+            if (groupElement) {
+              const matchingElements = Array.from(groupElement.querySelectorAll(elementType));
+              if (elementIndex < matchingElements.length) {
+                hoveredElement = matchingElements[elementIndex];
+              }
+            }
+          }
+        }
+
         if (hoveredElement) {
           hoveredElement.setAttribute("data-highlight", "hover");
+          console.log(`[Preview] 高亮懸停元素: ${hoveredComponentId}`);
+        } else {
+          console.log(`[Preview] 未找到懸停元素: ${hoveredComponentId}`);
         }
       }
 
-      // 高亮選中元素
+      // 多種策略查找和高亮選中元素
       if (selectedComponentId) {
-        const selectedElement = svgElement.querySelector(`#${selectedComponentId}`);
+        let selectedElement = svgElement.querySelector(`#${selectedComponentId}`);
+
+        // 如果直接查找失敗，嘗試階層查找
+        if (!selectedElement && selectedComponentId.includes('-')) {
+          const parts = selectedComponentId.split('-');
+          if (parts.length >= 3) {
+            const groupId = parts[0];
+            const elementType = parts[1];
+            const elementIndex = parseInt(parts[2], 10);
+
+            const groupElement = svgElement.querySelector(`#${groupId}`);
+            if (groupElement) {
+              const matchingElements = Array.from(groupElement.querySelectorAll(elementType));
+              if (elementIndex < matchingElements.length) {
+                selectedElement = matchingElements[elementIndex];
+              }
+            }
+          }
+        }
+
         if (selectedElement) {
           selectedElement.setAttribute("data-highlight", "selected");
+          console.log(`[Preview] 高亮選中元素: ${selectedComponentId}`);
+        } else {
+          console.log(`[Preview] 未找到選中元素: ${selectedComponentId}`);
         }
       }
     } catch (error) {
